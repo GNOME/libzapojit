@@ -1,0 +1,16 @@
+Zapojit - GLib/GObject wrapper for Skydrive and Hotmail
+=======================================================
+
+Skydrive: http://msdn.microsoft.com/en-us/library/live/hh826521
+Hotmail: http://msdn.microsoft.com/en-us/library/live/hh826535
+
+Bugs: https://bugzilla.gnome.org/enter_bug.cgi?product=libzapojit
+Download: http://download.gnome.org/sources/libzapojit
+
+Zapojit is a Czech word that means "connect".
+
+----
+
+Zapojit is licensed under the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 2.1 of the
+License, or (at your option) any later version.

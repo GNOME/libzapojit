@@ -1,0 +1,460 @@
+/*
+ * Zapojit - GLib/GObject wrapper for Skydrive and Hotmail
+ * Copyright © 2012 Red Hat, Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ */
+
+
+#include "config.h"
+
+#include <json-glib/json-glib.h>
+#include <libsoup/soup.h>
+#include <rest/rest-proxy.h>
+#include <rest/rest-proxy-call.h>
+
+#include "zpj-skydrive.h"
+#include "zpj-skydrive-file.h"
+
+
+struct _ZpjSkydrivePrivate
+{
+  ZpjAuthorizer *authorizer;
+};
+
+enum
+{
+  PROP_0,
+  PROP_AUTHORIZER
+};
+
+
+G_DEFINE_TYPE (ZpjSkydrive, zpj_skydrive, G_TYPE_OBJECT);
+
+
+static const gchar *live_endpoint = "https://apis.live.net/v5.0/";
+
+
+static ZpjSkydriveEntry *
+zpj_skydrive_create_entry_from_json_node (JsonNode *node)
+{
+  ZpjSkydriveEntry *entry = NULL;
+  JsonObject *object;
+  const gchar *description;
+  const gchar *id;
+  const gchar *name;
+  const gchar *parent_id;
+  const gchar *type;
+
+  object = json_node_get_object (node);
+  description = json_object_get_string_member (object, "description");
+  id = json_object_get_string_member (object, "id");
+  name = json_object_get_string_member (object, "name");
+  parent_id = json_object_get_string_member (object, "parent_id");
+
+  type = json_object_get_string_member (object, "type");
+  if (g_strcmp0 (type, "file") == 0)
+    entry = zpj_skydrive_file_new (id, name, description, parent_id);
+  else if (g_strcmp0 (type, "album") == 0 || g_strcmp0 (type, "folder") == 0)
+    entry = zpj_skydrive_folder_new (id, name, description, parent_id);
+  else
+    g_warning ("unknown type: %s", type);
+
+  return entry;
+}
+
+
+static void
+zpj_skydrive_list_json_array_foreach_folder (JsonArray *array,
+                                             guint index,
+                                             JsonNode *element_node,
+                                             gpointer user_data)
+{
+  GList **list = (GList **) user_data;
+  ZpjSkydriveEntry *entry;
+
+  entry = zpj_skydrive_create_entry_from_json_node (element_node);
+  *list = g_list_prepend (*list, entry);
+}
+
+
+static void
+zpj_skydrive_dispose (GObject *object)
+{
+  ZpjSkydrive *self = ZPJ_SKYDRIVE (object);
+  ZpjSkydrivePrivate *priv = self->priv;
+
+  g_clear_object (&priv->authorizer);
+
+  G_OBJECT_CLASS (zpj_skydrive_parent_class)->dispose (object);
+}
+
+
+static void
+zpj_skydrive_get_property (GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
+{
+  ZpjSkydrive *self = ZPJ_SKYDRIVE (object);
+  ZpjSkydrivePrivate *priv = self->priv;
+
+  switch (prop_id)
+    {
+    case PROP_AUTHORIZER:
+      g_value_set_object (value, priv->authorizer);
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+
+static void
+zpj_skydrive_set_property (GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
+{
+  ZpjSkydrive *self = ZPJ_SKYDRIVE (object);
+
+  switch (prop_id)
+    {
+    case PROP_AUTHORIZER:
+      zpj_skydrive_set_authorizer (self, g_value_get_object (value));
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+
+static void
+zpj_skydrive_init (ZpjSkydrive *self)
+{
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, ZPJ_TYPE_SKYDRIVE, ZpjSkydrivePrivate);
+}
+
+
+static void
+zpj_skydrive_class_init (ZpjSkydriveClass *class)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (class);
+
+  object_class->dispose = zpj_skydrive_dispose;
+  object_class->get_property = zpj_skydrive_get_property;
+  object_class->set_property = zpj_skydrive_set_property;
+
+  g_object_class_install_property (object_class,
+                                   PROP_AUTHORIZER,
+                                   g_param_spec_object ("authorizer",
+                                                        "Authorizer",
+                                                        "An authorizer object to provide an access token for each "
+                                                        "request",
+                                                        ZPJ_TYPE_AUTHORIZER,
+                                                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
+
+  g_type_class_add_private (class, sizeof (ZpjSkydrivePrivate));
+}
+
+
+ZpjSkydrive *
+zpj_skydrive_new (ZpjAuthorizer *authorizer)
+{
+  return g_object_new (ZPJ_TYPE_SKYDRIVE, "authorizer", authorizer, NULL);
+}
+
+
+gboolean
+zpj_skydrive_create_folder (ZpjSkydrive *self,
+                            ZpjSkydriveFolder *folder,
+                            GCancellable *cancellable,
+                            GError **error)
+{
+  const gchar *name;
+  const gchar *parent_id;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), FALSE);
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE_FOLDER (folder), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  parent_id = zpj_skydrive_entry_get_parent_id (ZPJ_SKYDRIVE_ENTRY (folder));
+  g_return_val_if_fail (parent_id != NULL && parent_id[0] != '\0', FALSE);
+
+  name = zpj_skydrive_entry_get_name (ZPJ_SKYDRIVE_ENTRY (folder));
+  return zpj_skydrive_create_folder_from_name (self, name, parent_id, cancellable, error);
+}
+
+
+gboolean
+zpj_skydrive_create_folder_from_name (ZpjSkydrive *self,
+                                      const gchar *name,
+                                      const gchar *parent_id,
+                                      GCancellable *cancellable,
+                                      GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), FALSE);
+  g_return_val_if_fail (parent_id != NULL && parent_id[0] != '\0', FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+ out:
+  return FALSE;
+}
+
+
+GList *
+zpj_skydrive_list_folder (ZpjSkydrive *self, ZpjSkydriveFolder *folder, GCancellable *cancellable, GError **error)
+{
+  const gchar *folder_id;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE_FOLDER (folder), NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  folder_id = zpj_skydrive_entry_get_id (ZPJ_SKYDRIVE_ENTRY (folder));
+  g_return_val_if_fail (folder_id != NULL && folder_id[0] != '\0', NULL);
+
+  return zpj_skydrive_list_folder_id (self, folder_id, cancellable, error);
+}
+
+
+GList *
+zpj_skydrive_list_folder_id (ZpjSkydrive *self, const gchar *folder_id, GCancellable *cancellable, GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+  GList *list = NULL;
+  JsonArray *array;
+  JsonNode *root;
+  JsonObject *object;
+  JsonParser *parser = NULL;
+  RestProxy *proxy = NULL;
+  RestProxyCall *call = NULL;
+  const gchar *payload;
+  gchar *url = NULL;
+  goffset length;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
+  g_return_val_if_fail (folder_id != NULL && folder_id[0] != '\0', NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+  url = g_strconcat (live_endpoint, folder_id, "/files", NULL);
+  proxy = rest_proxy_new (url, FALSE);
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_method (call, "GET");
+
+  zpj_authorizer_process_call (priv->authorizer, NULL, call);
+
+  if (!rest_proxy_call_sync (call, error))
+    goto out;
+
+  payload = rest_proxy_call_get_payload (call);
+  length = rest_proxy_call_get_payload_length (call);
+  parser = json_parser_new ();
+  if (!json_parser_load_from_data (parser, payload, length, error))
+    goto out;
+
+  root = json_parser_get_root (parser);
+  object = json_node_get_object (root);
+  array = json_object_get_array_member (object, "data");
+
+  json_array_foreach_element (array, zpj_skydrive_list_json_array_foreach_folder, &list);
+  list = g_list_reverse (list);
+
+ out:
+  g_clear_object (&parser);
+  g_clear_object (&call);
+  g_clear_object (&proxy);
+  g_free (url);
+  return list;
+}
+
+
+ZpjAuthorizer *
+zpj_skydrive_get_authorizer (ZpjSkydrive *self)
+{
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
+  return self->priv->authorizer;
+}
+
+
+ZpjSkydriveEntry *
+zpj_skydrive_query_info_from_id (ZpjSkydrive *self, const gchar *id, GCancellable *cancellable, GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+  JsonNode *root;
+  JsonObject *object;
+  JsonParser *parser = NULL;
+  RestProxy *proxy = NULL;
+  RestProxyCall *call = NULL;
+  ZpjSkydriveEntry *entry = NULL;
+  const gchar *payload;
+  gchar *url = NULL;
+  goffset length;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
+  g_return_val_if_fail (id != NULL && id[0] != '\0', NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+  url = g_strconcat (live_endpoint, id, NULL);
+  proxy = rest_proxy_new (url, FALSE);
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_method (call, "GET");
+
+  zpj_authorizer_process_call (priv->authorizer, NULL, call);
+
+  if (!rest_proxy_call_sync (call, error))
+    goto out;
+
+  payload = rest_proxy_call_get_payload (call);
+  length = rest_proxy_call_get_payload_length (call);
+  parser = json_parser_new ();
+  if (!json_parser_load_from_data (parser, payload, length, error))
+    goto out;
+
+  root = json_parser_get_root (parser);
+  entry = zpj_skydrive_create_entry_from_json_node (root);
+
+ out:
+  g_clear_object (&parser);
+  g_clear_object (&call);
+  g_clear_object (&proxy);
+  g_free (url);
+
+  return entry;
+}
+
+
+void
+zpj_skydrive_set_authorizer (ZpjSkydrive *self, ZpjAuthorizer *authorizer)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+
+  g_return_if_fail (ZPJ_IS_SKYDRIVE (self));
+  g_return_if_fail (authorizer == NULL || ZPJ_IS_AUTHORIZER (authorizer));
+
+  g_clear_object (&priv->authorizer);
+
+  if (authorizer != NULL)
+    {
+      g_object_ref (authorizer);
+      priv->authorizer = authorizer;
+    }
+
+  g_object_notify (G_OBJECT (self), "authorizer");
+}
+
+
+gboolean
+zpj_skydrive_upload_path_to_folder (ZpjSkydrive *self,
+                                    const gchar *path,
+                                    ZpjSkydriveFolder *folder,
+                                    GCancellable *cancellable,
+                                    GError **error)
+{
+  const gchar *folder_id;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), FALSE);
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE_FOLDER (folder), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  folder_id = zpj_skydrive_entry_get_id (ZPJ_SKYDRIVE_ENTRY (folder));
+  g_return_val_if_fail (folder_id != NULL && folder_id[0] != '\0', FALSE);
+
+  return zpj_skydrive_upload_path_to_folder_id (self, path, folder_id, cancellable, error);
+}
+
+
+gboolean
+zpj_skydrive_upload_path_to_folder_id (ZpjSkydrive *self,
+                                       const gchar *path,
+                                       const gchar *folder_id,
+                                       GCancellable *cancellable,
+                                       GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+  GMappedFile *file = NULL;
+  SoupBuffer *buffer = NULL;
+  SoupMessage *message = NULL;
+  SoupMultipart *multipart = NULL;
+  SoupSession *session = NULL;
+  gboolean ret_val = FALSE;
+  gchar *basename = NULL;
+  gchar *contents;
+  gchar *url = NULL;
+  gsize length;
+  guint status;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), FALSE);
+  g_return_val_if_fail (folder_id != NULL && folder_id[0] != '\0', FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+  file = g_mapped_file_new (path, FALSE, error);
+  if (file == NULL)
+    goto out;
+
+  session = soup_session_sync_new ();
+
+  url = g_strconcat (live_endpoint, folder_id, "/files", NULL);
+  message = soup_message_new ("POST", url);
+  zpj_authorizer_process_message (priv->authorizer, NULL, message);
+
+  basename = g_path_get_basename (path);
+
+  contents = g_mapped_file_get_contents (file);
+  length = g_mapped_file_get_length (file);
+  buffer = soup_buffer_new (SOUP_MEMORY_STATIC, contents, length);
+
+  multipart = soup_multipart_new ("multipart/form-data");
+  soup_multipart_append_form_file (multipart, "file", basename, "application/octet-stream", buffer);
+  soup_multipart_to_message (multipart, message->request_headers, message->request_body);
+
+  status = soup_session_send_message (session, message);
+  if (status != 201)
+    {
+      /* TODO: set error */
+      goto out;
+    }
+
+  ret_val = TRUE;
+
+ out:
+  if (multipart != NULL)
+    soup_multipart_free (multipart);
+  if (buffer != NULL)
+    soup_buffer_free (buffer);
+  g_free (basename);
+  g_clear_object (&message);
+  g_free (url);
+  g_clear_object (&session);
+  if (file != NULL)
+    g_mapped_file_unref (file);
+
+  return ret_val;
+}
