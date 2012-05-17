@@ -70,18 +70,31 @@ zpj_goa_authorizer_process_message (ZpjAuthorizer *iface, ZpjAuthorizationDomain
 {
   ZpjGoaAuthorizer *self = ZPJ_GOA_AUTHORIZER (iface);
   ZpjGoaAuthorizerPrivate *priv = self->priv;
+  gchar *auth_value = NULL;
 
   g_mutex_lock (&priv->mutex);
 
-  if (priv->access_token != NULL)
-    {
-      gchar *auth_value;
+  if (priv->access_token == NULL)
+    goto out;
 
+  if (g_strcmp0 (message->method, "GET") == 0)
+    {
+      SoupURI *uri;
+
+      uri = soup_message_get_uri (message);
+      auth_value = g_strconcat ("access_token=", priv->access_token, NULL);
+      soup_uri_set_query (uri, auth_value);
+    }
+  else if (g_strcmp0 (message->method, "POST") == 0)
+    {
       auth_value = g_strconcat ("Bearer ", priv->access_token, NULL);
       soup_message_headers_append (message->request_headers, "Authorization", auth_value);
-      g_free (auth_value);
     }
+  else
+    g_assert_not_reached ();
 
+ out:
+  g_free (auth_value);
   g_mutex_unlock (&priv->mutex);
 }
 
