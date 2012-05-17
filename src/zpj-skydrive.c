@@ -45,6 +45,16 @@ enum
 G_DEFINE_TYPE (ZpjSkydrive, zpj_skydrive, G_TYPE_OBJECT);
 
 
+typedef struct _ZpjSkydriveAsyncData ZpjSkydriveAsyncData;
+
+struct _ZpjSkydriveAsyncData
+{
+  GCancellable *cancellable;
+  GError **error;
+  GMainLoop *loop;
+  GOutputStream *ostream;
+};
+
 static const gchar *live_endpoint = "https://apis.live.net/v5.0/";
 
 
@@ -74,6 +84,29 @@ zpj_skydrive_create_entry_from_json_node (JsonNode *node)
     g_warning ("unknown type: %s", type);
 
   return entry;
+}
+
+
+static void
+zpj_skydrive_download_file_complete (SoupSession *session, SoupMessage *message, gpointer user_data)
+{
+  ZpjSkydriveAsyncData *data = (ZpjSkydriveAsyncData *) user_data;
+  g_main_loop_quit (data->loop);
+}
+
+
+static void
+zpj_skydrive_download_file_got_chunk (SoupMessage *message, SoupBuffer *chunk, gpointer user_data)
+{
+  ZpjSkydriveAsyncData *data = (ZpjSkydriveAsyncData *) user_data;
+  gsize bytes_written;
+
+  g_output_stream_write_all (data->ostream,
+                             chunk->data,
+                             chunk->length,
+                             &bytes_written,
+                             data->cancellable,
+                             data->error);
 }
 
 
@@ -215,6 +248,87 @@ zpj_skydrive_create_folder_from_name (ZpjSkydrive *self,
 
  out:
   return FALSE;
+}
+
+
+gboolean
+zpj_skydrive_download_file_id_to_path (ZpjSkydrive *self,
+                                       const gchar *file_id,
+                                       const gchar *path,
+                                       GCancellable *cancellable,
+                                       GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+  ZpjSkydriveAsyncData data;
+  GFile *file_dest = NULL;
+  GFile *file_tmp = NULL;
+  GFileIOStream *iostream = NULL;
+  GMainContext *context = NULL;
+  SoupMessage *message;
+  SoupSession *session = NULL;
+  gboolean ret_val = FALSE;
+  gchar *url = NULL;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), FALSE);
+  g_return_val_if_fail (file_id != NULL && file_id[0] != '\0', FALSE);
+  g_return_val_if_fail (path != NULL && path[0] != '\0', FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  data.loop = NULL;
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+  file_tmp = g_file_new_tmp (NULL, &iostream, error);
+  if (file_tmp == NULL)
+    goto out;
+
+  data.cancellable = cancellable;
+  data.error = error;
+  data.ostream = g_io_stream_get_output_stream (G_IO_STREAM (iostream));
+
+  context = g_main_context_new ();
+  g_main_context_push_thread_default (context);
+  data.loop = g_main_loop_new (context, FALSE);
+
+  session = soup_session_async_new_with_options (SOUP_SESSION_USE_THREAD_CONTEXT, TRUE, NULL);
+
+  url = g_strconcat (live_endpoint, file_id, "/content", NULL);
+  message = soup_message_new ("GET", url);
+  zpj_authorizer_process_message (priv->authorizer, NULL, message);
+
+  soup_message_body_set_accumulate (message->response_body, FALSE);
+  g_signal_connect (message, "got-chunk", G_CALLBACK (zpj_skydrive_download_file_got_chunk), &data);
+
+  soup_session_queue_message (session, message, zpj_skydrive_download_file_complete, &data);
+  g_main_loop_run (data.loop);
+
+  g_main_context_pop_thread_default (context);
+
+  if (!g_io_stream_close (G_IO_STREAM (iostream), cancellable, error))
+    goto out;
+
+  file_dest = g_file_new_for_path (path);
+  if (!g_file_move (file_tmp, file_dest, G_FILE_COPY_BACKUP | G_FILE_COPY_OVERWRITE, cancellable, NULL, NULL, error))
+    goto out;
+
+  ret_val = TRUE;
+
+ out:
+  /* Deletion of the temporary file is not cancellable */
+  g_file_delete (file_tmp, NULL, NULL);
+
+  g_clear_object (&file_dest);
+  g_free (url);
+  g_clear_object (&session);
+  if (data.loop != NULL)
+    g_main_loop_unref (data.loop);
+  if (context != NULL)
+    g_main_context_unref (context);
+  g_clear_object (&iostream);
+  g_clear_object (&file_tmp);
+
+  return ret_val;
 }
 
 
