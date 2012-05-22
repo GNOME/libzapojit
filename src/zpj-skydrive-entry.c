@@ -27,6 +27,7 @@
 
 struct _ZpjSkydriveEntryPrivate
 {
+  GDateTime *updated_time;
   ZpjSkydriveEntryType type;
   gchar *description;
   gchar *id;
@@ -41,7 +42,8 @@ enum
   PROP_ID,
   PROP_NAME,
   PROP_PARENT_ID,
-  PROP_TYPE
+  PROP_TYPE,
+  PROP_UPDATED_TIME
 };
 
 
@@ -91,6 +93,10 @@ zpj_skydrive_entry_get_property (GObject *object, guint prop_id, GValue *value, 
       g_value_set_enum (value, priv->type);
       break;
 
+    case PROP_UPDATED_TIME:
+      g_value_set_boxed (value, priv->updated_time);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -124,6 +130,10 @@ zpj_skydrive_entry_set_property (GObject *object, guint prop_id, const GValue *v
 
     case PROP_TYPE:
       priv->type = g_value_get_enum (value);
+      break;
+
+    case PROP_UPDATED_TIME:
+      priv->updated_time = g_value_dup_boxed (value);
       break;
 
     default:
@@ -190,6 +200,14 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                       ZPJ_SKYDRIVE_ENTRY_TYPE_INVALID,
                                                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 
+  g_object_class_install_property (object_class,
+                                   PROP_UPDATED_TIME,
+                                   g_param_spec_boxed ("updated-time",
+                                                       "Updated Time",
+                                                       "The date and time when the entry was last updated.",
+                                                       G_TYPE_DATE_TIME,
+                                                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+
   g_type_class_add_private (class, sizeof (ZpjSkydriveEntryPrivate));
 }
 
@@ -219,6 +237,13 @@ const gchar *
 zpj_skydrive_entry_get_parent_id (ZpjSkydriveEntry *self)
 {
   return self->priv->parent_id;
+}
+
+
+GDateTime *
+zpj_skydrive_entry_get_updated_time (ZpjSkydriveEntry *self)
+{
+  return self->priv->updated_time;
 }
 
 

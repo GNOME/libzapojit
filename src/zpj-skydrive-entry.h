@@ -79,6 +79,8 @@ const gchar        *zpj_skydrive_entry_get_name           (ZpjSkydriveEntry *sel
 
 const gchar        *zpj_skydrive_entry_get_parent_id      (ZpjSkydriveEntry *self);
 
+GDateTime          *zpj_skydrive_entry_get_updated_time   (ZpjSkydriveEntry *self);
+
 gboolean            zpj_skydrive_entry_is_folder          (ZpjSkydriveEntry *self);
 
 G_END_DECLS
