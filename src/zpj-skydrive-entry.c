@@ -21,8 +21,13 @@
 
 #include "config.h"
 
+#include <glib.h>
+#include <json-glib/json-glib.h>
+
 #include "zpj-enums.h"
 #include "zpj-skydrive-entry.h"
+#include "zpj-skydrive-file.h"
+#include "zpj-skydrive-folder.h"
 
 
 struct _ZpjSkydriveEntryPrivate
@@ -40,6 +45,7 @@ enum
   PROP_0,
   PROP_DESCRIPTION,
   PROP_ID,
+  PROP_JSON,
   PROP_NAME,
   PROP_PARENT_ID,
   PROP_TYPE,
@@ -48,6 +54,53 @@ enum
 
 
 G_DEFINE_ABSTRACT_TYPE (ZpjSkydriveEntry, zpj_skydrive_entry, G_TYPE_OBJECT);
+
+
+static void
+zpj_skydrive_entry_parse_json_node (ZpjSkydriveEntry *self, JsonNode *node)
+{
+  ZpjSkydriveEntryPrivate *priv = self->priv;
+  GTimeVal tv;
+  JsonObject *object;
+  const gchar *description;
+  const gchar *id;
+  const gchar *updated_time;
+  const gchar *name;
+  const gchar *parent_id;
+  const gchar *type;
+
+  object = json_node_get_object (node);
+
+  description = json_object_get_string_member (object, "description");
+  priv->description = g_strdup (description);
+
+  id = json_object_get_string_member (object, "id");
+  priv->id = g_strdup (id);
+
+  updated_time = json_object_get_string_member (object, "updated_time");
+  if (g_time_val_from_iso8601 (updated_time, &tv))
+    priv->updated_time = g_date_time_new_from_timeval_local (&tv);
+
+  name = json_object_get_string_member (object, "name");
+  priv->name = g_strdup (name);
+
+  parent_id = json_object_get_string_member (object, "parent_id");
+  priv->parent_id = g_strdup (parent_id);
+
+  type = json_object_get_string_member (object, "type");
+  if (g_strcmp0 (type, "file") == 0)
+    {
+      g_assert_cmpuint (G_OBJECT_TYPE (self), ==, ZPJ_TYPE_SKYDRIVE_FILE);
+      priv->type = ZPJ_SKYDRIVE_ENTRY_TYPE_FILE;
+    }
+  else if (g_strcmp0 (type, "album") == 0 || g_strcmp0 (type, "folder") == 0)
+    {
+      g_assert_cmpuint (G_OBJECT_TYPE (self), ==, ZPJ_TYPE_SKYDRIVE_FOLDER);
+      priv->type = ZPJ_SKYDRIVE_ENTRY_TYPE_FOLDER;
+    }
+  else
+    g_warning ("unknown type: %s", type);
+}
 
 
 static void
@@ -112,29 +165,17 @@ zpj_skydrive_entry_set_property (GObject *object, guint prop_id, const GValue *v
 
   switch (prop_id)
     {
-    case PROP_DESCRIPTION:
-      priv->description = g_value_dup_string (value);
-      break;
+    case PROP_JSON:
+      {
+        JsonNode *node;
 
-    case PROP_ID:
-      priv->id = g_value_dup_string (value);
-      break;
+        node = (JsonNode *) g_value_get_boxed (value);
+        if (node == NULL)
+          break;
 
-    case PROP_NAME:
-      priv->name = g_value_dup_string (value);
-      break;
-
-    case PROP_PARENT_ID:
-      priv->parent_id = g_value_dup_string (value);
-      break;
-
-    case PROP_TYPE:
-      priv->type = g_value_get_enum (value);
-      break;
-
-    case PROP_UPDATED_TIME:
-      priv->updated_time = g_value_dup_boxed (value);
-      break;
+        zpj_skydrive_entry_parse_json_node (self, node);
+        break;
+      }
 
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -165,7 +206,7 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                         "Description",
                                                         "A brief description of this entry.",
                                                         NULL,
-                                                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+                                                        G_PARAM_READABLE));
 
   g_object_class_install_property (object_class,
                                    PROP_ID,
@@ -173,7 +214,15 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                         "ID",
                                                         "Unique identifier corresponding to this entry.",
                                                         NULL,
-                                                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                                   PROP_JSON,
+                                   g_param_spec_boxed ("json",
+                                                       "JSON",
+                                                       "The JSON node representing this entry.",
+                                                       JSON_TYPE_NODE,
+                                                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE));
 
   g_object_class_install_property (object_class,
                                    PROP_NAME,
@@ -181,7 +230,7 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                         "Name",
                                                         "Human readable name of this entry.",
                                                         NULL,
-                                                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+                                                        G_PARAM_READABLE));
 
   g_object_class_install_property (object_class,
                                    PROP_PARENT_ID,
@@ -189,7 +238,7 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                         "Parent ID",
                                                         "Unique identifier corresponding to the parent entry.",
                                                         NULL,
-                                                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+                                                        G_PARAM_READABLE));
 
   g_object_class_install_property (object_class,
                                    PROP_TYPE,
@@ -198,7 +247,7 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                       "Indicates whether this entry is a file or a entry.",
                                                       ZPJ_TYPE_SKYDRIVE_ENTRY_TYPE,
                                                       ZPJ_SKYDRIVE_ENTRY_TYPE_INVALID,
-                                                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+                                                      G_PARAM_READABLE));
 
   g_object_class_install_property (object_class,
                                    PROP_UPDATED_TIME,
@@ -206,7 +255,7 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                        "Updated Time",
                                                        "The date and time when the entry was last updated.",
                                                        G_TYPE_DATE_TIME,
-                                                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+                                                       G_PARAM_READABLE));
 
   g_type_class_add_private (class, sizeof (ZpjSkydriveEntryPrivate));
 }

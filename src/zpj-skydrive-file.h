@@ -21,6 +21,8 @@
 #ifndef ZPJ_SKYDRIVE_FILE_H
 #define ZPJ_SKYDRIVE_FILE_H
 
+#include <json-glib/json-glib.h>
+
 #include "zpj-skydrive-entry.h"
 
 G_BEGIN_DECLS
@@ -62,10 +64,7 @@ struct _ZpjSkydriveFileClass
 
 GType               zpj_skydrive_file_get_type           (void) G_GNUC_CONST;
 
-ZpjSkydriveEntry   *zpj_skydrive_file_new                (const gchar *id,
-                                                          const gchar *name,
-                                                          const gchar *description,
-                                                          const gchar *parent_id);
+ZpjSkydriveEntry   *zpj_skydrive_file_new                (JsonNode *node);
 
 G_END_DECLS
 

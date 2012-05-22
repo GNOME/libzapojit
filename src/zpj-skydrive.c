@@ -63,23 +63,15 @@ zpj_skydrive_create_entry_from_json_node (JsonNode *node)
 {
   ZpjSkydriveEntry *entry = NULL;
   JsonObject *object;
-  const gchar *description;
-  const gchar *id;
-  const gchar *name;
-  const gchar *parent_id;
   const gchar *type;
 
   object = json_node_get_object (node);
-  description = json_object_get_string_member (object, "description");
-  id = json_object_get_string_member (object, "id");
-  name = json_object_get_string_member (object, "name");
-  parent_id = json_object_get_string_member (object, "parent_id");
 
   type = json_object_get_string_member (object, "type");
   if (g_strcmp0 (type, "file") == 0)
-    entry = zpj_skydrive_file_new (id, name, description, parent_id);
+    entry = zpj_skydrive_file_new (node);
   else if (g_strcmp0 (type, "album") == 0 || g_strcmp0 (type, "folder") == 0)
-    entry = zpj_skydrive_folder_new (id, name, description, parent_id);
+    entry = zpj_skydrive_folder_new (node);
   else
     g_warning ("unknown type: %s", type);
 

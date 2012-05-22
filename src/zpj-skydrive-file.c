@@ -40,13 +40,7 @@ zpj_skydrive_file_class_init (ZpjSkydriveFileClass *class)
 
 
 ZpjSkydriveEntry *
-zpj_skydrive_file_new (const gchar *id, const gchar *name, const gchar *description, const gchar *parent_id)
+zpj_skydrive_file_new (JsonNode *node)
 {
-  return g_object_new (ZPJ_TYPE_SKYDRIVE_FILE,
-                       "description", description,
-                       "id", id,
-                       "name", name,
-                       "parent-id", parent_id,
-                       "type", ZPJ_SKYDRIVE_ENTRY_TYPE_FILE,
-                       NULL);
+  return g_object_new (ZPJ_TYPE_SKYDRIVE_FILE, "json", node, NULL);
 }
