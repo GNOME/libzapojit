@@ -83,6 +83,11 @@ gboolean            zpj_skydrive_create_folder_from_name     (ZpjSkydrive *self,
                                                               GCancellable *cancellable,
                                                               GError **error);
 
+gboolean            zpj_skydrive_delete_entry_id             (ZpjSkydrive *self,
+                                                              const gchar *entry_id,
+                                                              GCancellable *cancellable,
+                                                              GError **error);
+
 gboolean            zpj_skydrive_download_file_id_to_path    (ZpjSkydrive *self,
                                                               const gchar *file_id,
                                                               const gchar *path,

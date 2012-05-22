@@ -252,6 +252,46 @@ zpj_skydrive_create_folder_from_name (ZpjSkydrive *self,
 
 
 gboolean
+zpj_skydrive_delete_entry_id (ZpjSkydrive *self, const gchar *entry_id, GCancellable *cancellable, GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+  SoupMessage *message = NULL;
+  SoupSession *session = NULL;
+  gboolean ret_val = FALSE;
+  gchar *url = NULL;
+  guint status;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), FALSE);
+  g_return_val_if_fail (entry_id != NULL && entry_id[0] != '\0', FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+  session = soup_session_sync_new ();
+
+  url = g_strconcat (live_endpoint, entry_id, NULL);
+  message = soup_message_new ("DELETE", url);
+  zpj_authorizer_process_message (priv->authorizer, NULL, message);
+
+  status = soup_session_send_message (session, message);
+  if (status != 204)
+    {
+      /* TODO: set error */
+      goto out;
+    }
+
+  ret_val = TRUE;
+
+ out:
+  g_free (url);
+  g_clear_object (&message);
+  g_clear_object (&session);
+  return ret_val;
+}
+
+
+gboolean
 zpj_skydrive_download_file_id_to_path (ZpjSkydrive *self,
                                        const gchar *file_id,
                                        const gchar *path,
