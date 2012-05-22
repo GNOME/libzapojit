@@ -104,6 +104,22 @@ zpj_skydrive_entry_parse_json_node (ZpjSkydriveEntry *self, JsonNode *node)
 
 
 static void
+zpj_skydrive_entry_dispose (GObject *object)
+{
+  ZpjSkydriveEntry *self = ZPJ_SKYDRIVE_ENTRY (object);
+  ZpjSkydriveEntryPrivate *priv = self->priv;
+
+  if (priv->updated_time != NULL)
+    {
+      g_date_time_unref (priv->updated_time);
+      priv->updated_time = NULL;
+    }
+
+  G_OBJECT_CLASS (zpj_skydrive_entry_parent_class)->dispose (object);
+}
+
+
+static void
 zpj_skydrive_entry_finalize (GObject *object)
 {
   ZpjSkydriveEntry *self = ZPJ_SKYDRIVE_ENTRY (object);
@@ -196,6 +212,7 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (class);
 
+  object_class->dispose = zpj_skydrive_entry_dispose;
   object_class->finalize = zpj_skydrive_entry_finalize;
   object_class->get_property = zpj_skydrive_entry_get_property;
   object_class->set_property = zpj_skydrive_entry_set_property;
