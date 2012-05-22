@@ -77,7 +77,7 @@ zpj_goa_authorizer_process_message (ZpjAuthorizer *iface, ZpjAuthorizationDomain
   if (priv->access_token == NULL)
     goto out;
 
-  if (g_strcmp0 (message->method, "GET") == 0)
+  if (g_strcmp0 (message->method, "DELETE") == 0 || g_strcmp0 (message->method, "GET") == 0)
     {
       SoupURI *uri;
 
