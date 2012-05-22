@@ -26,6 +26,7 @@
 
 #include "zpj-authorizer.h"
 #include "zpj-skydrive-entry.h"
+#include "zpj-skydrive-file.h"
 #include "zpj-skydrive-folder.h"
 
 G_BEGIN_DECLS
@@ -84,6 +85,12 @@ gboolean            zpj_skydrive_create_folder_from_name     (ZpjSkydrive *self,
 
 gboolean            zpj_skydrive_download_file_id_to_path    (ZpjSkydrive *self,
                                                               const gchar *file_id,
+                                                              const gchar *path,
+                                                              GCancellable *cancellable,
+                                                              GError **error);
+
+gboolean            zpj_skydrive_download_file_to_path       (ZpjSkydrive *self,
+                                                              ZpjSkydriveFile *file,
                                                               const gchar *path,
                                                               GCancellable *cancellable,
                                                               GError **error);

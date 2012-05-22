@@ -332,6 +332,27 @@ zpj_skydrive_download_file_id_to_path (ZpjSkydrive *self,
 }
 
 
+gboolean
+zpj_skydrive_download_file_to_path (ZpjSkydrive *self,
+                                    ZpjSkydriveFile *file,
+                                    const gchar *path,
+                                    GCancellable *cancellable,
+                                    GError **error)
+{
+  const gchar *file_id;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), FALSE);
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE_FILE (file), FALSE);
+  g_return_val_if_fail (path != NULL && path[0] != '\0', FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  file_id = zpj_skydrive_entry_get_id (ZPJ_SKYDRIVE_ENTRY (file));
+  g_return_val_if_fail (file_id != NULL && file_id[0] != '\0', FALSE);
+
+  return zpj_skydrive_download_file_id_to_path (self, file_id, path, cancellable, error);
+}
+
+
 GList *
 zpj_skydrive_list_folder (ZpjSkydrive *self, ZpjSkydriveFolder *folder, GCancellable *cancellable, GError **error)
 {
