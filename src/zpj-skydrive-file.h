@@ -49,12 +49,14 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
    ZPJ_TYPE_SKYDRIVE_FILE, ZpjSkydriveFileClass))
 
-typedef struct _ZpjSkydriveFile      ZpjSkydriveFile;
-typedef struct _ZpjSkydriveFileClass ZpjSkydriveFileClass;
+typedef struct _ZpjSkydriveFile        ZpjSkydriveFile;
+typedef struct _ZpjSkydriveFileClass   ZpjSkydriveFileClass;
+typedef struct _ZpjSkydriveFilePrivate ZpjSkydriveFilePrivate;
 
 struct _ZpjSkydriveFile
 {
   ZpjSkydriveEntry parent_instance;
+  ZpjSkydriveFilePrivate *priv;
 };
 
 struct _ZpjSkydriveFileClass
@@ -65,6 +67,8 @@ struct _ZpjSkydriveFileClass
 GType               zpj_skydrive_file_get_type           (void) G_GNUC_CONST;
 
 ZpjSkydriveEntry   *zpj_skydrive_file_new                (JsonNode *node);
+
+goffset             zpj_skydrive_file_get_size           (ZpjSkydriveFile *self);
 
 G_END_DECLS
 
