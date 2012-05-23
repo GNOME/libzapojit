@@ -49,6 +49,11 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
    ZPJ_TYPE_SKYDRIVE_FOLDER, ZpjSkydriveFolderClass))
 
+#define ZPJ_SKYDRIVE_FOLDER_SKYDRIVE "me/skydrive"
+#define ZPJ_SKYDRIVE_FOLDER_MY_DOCUMENTS "me/skydrive/my_documents"
+#define ZPJ_SKYDRIVE_FOLDER_MY_PHOTOS "me/skydrive/my_photos"
+#define ZPJ_SKYDRIVE_FOLDER_PUBLIC_DOCUMENTS "me/skydrive/public_documents"
+
 typedef struct _ZpjSkydriveFolder      ZpjSkydriveFolder;
 typedef struct _ZpjSkydriveFolderClass ZpjSkydriveFolderClass;
 
