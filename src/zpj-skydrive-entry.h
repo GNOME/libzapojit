@@ -75,6 +75,8 @@ struct _ZpjSkydriveEntryClass
 
 GType               zpj_skydrive_entry_get_type           (void) G_GNUC_CONST;
 
+GDateTime          *zpj_skydrive_entry_get_created_time   (ZpjSkydriveEntry *self);
+
 const gchar        *zpj_skydrive_entry_get_description    (ZpjSkydriveEntry *self);
 
 const gchar        *zpj_skydrive_entry_get_id             (ZpjSkydriveEntry *self);

@@ -32,6 +32,7 @@
 
 struct _ZpjSkydriveEntryPrivate
 {
+  GDateTime *created_time;
   GDateTime *updated_time;
   ZpjSkydriveEntryType type;
   gchar *description;
@@ -43,6 +44,7 @@ struct _ZpjSkydriveEntryPrivate
 enum
 {
   PROP_0,
+  PROP_CREATED_TIME,
   PROP_DESCRIPTION,
   PROP_ID,
   PROP_JSON,
@@ -64,6 +66,7 @@ zpj_skydrive_entry_default_parse_json_node (ZpjSkydriveEntry *self, JsonNode *no
   JsonObject *object;
   const gchar *description;
   const gchar *id;
+  const gchar *created_time;
   const gchar *updated_time;
   const gchar *name;
   const gchar *parent_id;
@@ -76,6 +79,10 @@ zpj_skydrive_entry_default_parse_json_node (ZpjSkydriveEntry *self, JsonNode *no
 
   id = json_object_get_string_member (object, "id");
   priv->id = g_strdup (id);
+
+  created_time = json_object_get_string_member (object, "created_time");
+  if (g_time_val_from_iso8601 (created_time, &tv))
+    priv->created_time = g_date_time_new_from_timeval_local (&tv);
 
   updated_time = json_object_get_string_member (object, "updated_time");
   if (g_time_val_from_iso8601 (updated_time, &tv))
@@ -147,6 +154,10 @@ zpj_skydrive_entry_get_property (GObject *object, guint prop_id, GValue *value, 
 
   switch (prop_id)
     {
+    case PROP_CREATED_TIME:
+      g_value_set_boxed (value, priv->created_time);
+      break;
+
     case PROP_DESCRIPTION:
       g_value_set_string (value, priv->description);
       break;
@@ -224,6 +235,14 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
   class->parse_json_node = zpj_skydrive_entry_default_parse_json_node;
 
   g_object_class_install_property (object_class,
+                                   PROP_CREATED_TIME,
+                                   g_param_spec_boxed ("created-time",
+                                                       "Created Time",
+                                                       "The date and time when the entry was created.",
+                                                       G_TYPE_DATE_TIME,
+                                                       G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
                                    PROP_DESCRIPTION,
                                    g_param_spec_string ("description",
                                                         "Description",
@@ -281,6 +300,13 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                        G_PARAM_READABLE));
 
   g_type_class_add_private (class, sizeof (ZpjSkydriveEntryPrivate));
+}
+
+
+GDateTime *
+zpj_skydrive_entry_get_created_time (ZpjSkydriveEntry *self)
+{
+  return self->priv->created_time;
 }
 
 
