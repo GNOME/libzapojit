@@ -18,16 +18,29 @@
  * 02110-1301, USA.
  */
 
-#ifndef ZPJ_H
-#define ZPJ_H
 
-#include <zpj/zpj-authorization-domain.h>
-#include <zpj/zpj-authorizer.h>
-#include <zpj/zpj-goa-authorizer.h>
-#include <zpj/zpj-skydrive.h>
-#include <zpj/zpj-skydrive-entry.h>
-#include <zpj/zpj-skydrive-file.h>
-#include <zpj/zpj-skydrive-folder.h>
-#include <zpj/zpj-skydrive-photo.h>
+#include "config.h"
 
-#endif /* ZPJ_H */
+#include "zpj-skydrive-photo.h"
+
+
+G_DEFINE_TYPE (ZpjSkydrivePhoto, zpj_skydrive_photo, ZPJ_TYPE_SKYDRIVE_FILE);
+
+
+static void
+zpj_skydrive_photo_init (ZpjSkydrivePhoto *self)
+{
+}
+
+
+static void
+zpj_skydrive_photo_class_init (ZpjSkydrivePhotoClass *class)
+{
+}
+
+
+ZpjSkydriveEntry *
+zpj_skydrive_photo_new (JsonNode *node)
+{
+  return g_object_new (ZPJ_TYPE_SKYDRIVE_PHOTO, "json", node, NULL);
+}

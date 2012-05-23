@@ -28,6 +28,7 @@
 
 #include "zpj-skydrive.h"
 #include "zpj-skydrive-file.h"
+#include "zpj-skydrive-photo.h"
 
 
 struct _ZpjSkydrivePrivate
@@ -72,6 +73,8 @@ zpj_skydrive_create_entry_from_json_node (JsonNode *node)
     entry = zpj_skydrive_file_new (node);
   else if (g_strcmp0 (type, "album") == 0 || g_strcmp0 (type, "folder") == 0)
     entry = zpj_skydrive_folder_new (node);
+  else if (g_strcmp0 (type, "photo") == 0)
+    entry = zpj_skydrive_photo_new (node);
   else
     g_warning ("unknown type: %s", type);
 

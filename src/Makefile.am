@@ -14,6 +14,7 @@ libzapojit_0_0_la_SOURCES = \
 	zpj-skydrive-entry.c \
 	zpj-skydrive-file.c \
 	zpj-skydrive-folder.c \
+	zpj-skydrive-photo.c \
 	$(NULL)
 
 BUILT_SOURCES = \
@@ -32,6 +33,7 @@ libzapojitsubinclude_HEADERS = \
 	zpj-skydrive-entry.h \
 	zpj-skydrive-file.h \
 	zpj-skydrive-folder.h \
+	zpj-skydrive-photo.h \
 	$(NULL)
 
 EXTRA_DIST = \

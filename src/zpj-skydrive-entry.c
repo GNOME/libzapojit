@@ -28,6 +28,7 @@
 #include "zpj-skydrive-entry.h"
 #include "zpj-skydrive-file.h"
 #include "zpj-skydrive-folder.h"
+#include "zpj-skydrive-photo.h"
 
 
 struct _ZpjSkydriveEntryPrivate
@@ -97,6 +98,11 @@ zpj_skydrive_entry_parse_json_node (ZpjSkydriveEntry *self, JsonNode *node)
     {
       g_assert_cmpuint (G_OBJECT_TYPE (self), ==, ZPJ_TYPE_SKYDRIVE_FOLDER);
       priv->type = ZPJ_SKYDRIVE_ENTRY_TYPE_FOLDER;
+    }
+  else if (g_strcmp0 (type, "photo") == 0)
+    {
+      g_assert_cmpuint (G_OBJECT_TYPE (self), ==, ZPJ_TYPE_SKYDRIVE_PHOTO);
+      priv->type = ZPJ_SKYDRIVE_ENTRY_TYPE_PHOTO;
     }
   else
     g_warning ("unknown type: %s", type);
