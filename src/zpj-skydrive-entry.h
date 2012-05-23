@@ -22,6 +22,7 @@
 #define ZPJ_SKYDRIVE_ENTRY_H
 
 #include <glib-object.h>
+#include <json-glib/json-glib.h>
 
 G_BEGIN_DECLS
 
@@ -68,6 +69,8 @@ struct _ZpjSkydriveEntry
 struct _ZpjSkydriveEntryClass
 {
   GObjectClass parent_class;
+
+  void    (*parse_json_node)    (ZpjSkydriveEntry *self, JsonNode *node);
 };
 
 GType               zpj_skydrive_entry_get_type           (void) G_GNUC_CONST;

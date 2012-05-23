@@ -22,7 +22,6 @@
 #include "config.h"
 
 #include <glib.h>
-#include <json-glib/json-glib.h>
 
 #include "zpj-enums.h"
 #include "zpj-skydrive-entry.h"
@@ -58,7 +57,7 @@ G_DEFINE_ABSTRACT_TYPE (ZpjSkydriveEntry, zpj_skydrive_entry, G_TYPE_OBJECT);
 
 
 static void
-zpj_skydrive_entry_parse_json_node (ZpjSkydriveEntry *self, JsonNode *node)
+zpj_skydrive_entry_default_parse_json_node (ZpjSkydriveEntry *self, JsonNode *node)
 {
   ZpjSkydriveEntryPrivate *priv = self->priv;
   GTimeVal tv;
@@ -195,7 +194,7 @@ zpj_skydrive_entry_set_property (GObject *object, guint prop_id, const GValue *v
         if (node == NULL)
           break;
 
-        zpj_skydrive_entry_parse_json_node (self, node);
+        ZPJ_SKYDRIVE_ENTRY_GET_CLASS (self)->parse_json_node (self, node);
         break;
       }
 
@@ -222,6 +221,7 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
   object_class->finalize = zpj_skydrive_entry_finalize;
   object_class->get_property = zpj_skydrive_entry_get_property;
   object_class->set_property = zpj_skydrive_entry_set_property;
+  class->parse_json_node = zpj_skydrive_entry_default_parse_json_node;
 
   g_object_class_install_property (object_class,
                                    PROP_DESCRIPTION,
