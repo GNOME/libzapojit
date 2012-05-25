@@ -79,6 +79,10 @@ GDateTime          *zpj_skydrive_entry_get_created_time   (ZpjSkydriveEntry *sel
 
 const gchar        *zpj_skydrive_entry_get_description    (ZpjSkydriveEntry *self);
 
+const gchar        *zpj_skydrive_entry_get_from_id        (ZpjSkydriveEntry *self);
+
+const gchar        *zpj_skydrive_entry_get_from_name      (ZpjSkydriveEntry *self);
+
 const gchar        *zpj_skydrive_entry_get_id             (ZpjSkydriveEntry *self);
 
 const gchar        *zpj_skydrive_entry_get_name           (ZpjSkydriveEntry *self);

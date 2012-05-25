@@ -36,6 +36,8 @@ struct _ZpjSkydriveEntryPrivate
   GDateTime *updated_time;
   ZpjSkydriveEntryType type;
   gchar *description;
+  gchar *from_id;
+  gchar *from_name;
   gchar *id;
   gchar *name;
   gchar *parent_id;
@@ -46,6 +48,8 @@ enum
   PROP_0,
   PROP_CREATED_TIME,
   PROP_DESCRIPTION,
+  PROP_FROM_ID,
+  PROP_FROM_NAME,
   PROP_ID,
   PROP_JSON,
   PROP_NAME,
@@ -63,8 +67,11 @@ zpj_skydrive_entry_default_parse_json_node (ZpjSkydriveEntry *self, JsonNode *no
 {
   ZpjSkydriveEntryPrivate *priv = self->priv;
   GTimeVal tv;
+  JsonObject *from;
   JsonObject *object;
   const gchar *description;
+  const gchar *from_id;
+  const gchar *from_name;
   const gchar *id;
   const gchar *created_time;
   const gchar *updated_time;
@@ -76,6 +83,12 @@ zpj_skydrive_entry_default_parse_json_node (ZpjSkydriveEntry *self, JsonNode *no
 
   description = json_object_get_string_member (object, "description");
   priv->description = g_strdup (description);
+
+  from = json_object_get_object_member (object, "from");
+  from_id = json_object_get_string_member (from, "id");
+  priv->from_id = g_strdup (from_id);
+  from_name = json_object_get_string_member (from, "name");
+  priv->from_name = g_strdup (from_name);
 
   id = json_object_get_string_member (object, "id");
   priv->id = g_strdup (id);
@@ -138,6 +151,8 @@ zpj_skydrive_entry_finalize (GObject *object)
   ZpjSkydriveEntryPrivate *priv = self->priv;
 
   g_free (priv->description);
+  g_free (priv->from_id);
+  g_free (priv->from_name);
   g_free (priv->id);
   g_free (priv->name);
   g_free (priv->parent_id);
@@ -160,6 +175,14 @@ zpj_skydrive_entry_get_property (GObject *object, guint prop_id, GValue *value, 
 
     case PROP_DESCRIPTION:
       g_value_set_string (value, priv->description);
+      break;
+
+    case PROP_FROM_ID:
+      g_value_set_string (value, priv->from_id);
+      break;
+
+    case PROP_FROM_NAME:
+      g_value_set_string (value, priv->from_name);
       break;
 
     case PROP_ID:
@@ -251,6 +274,22 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
                                                         G_PARAM_READABLE));
 
   g_object_class_install_property (object_class,
+                                   PROP_FROM_ID,
+                                   g_param_spec_string ("from-id",
+                                                        "From ID",
+                                                        "The ID of the user created this entry.",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                                   PROP_FROM_NAME,
+                                   g_param_spec_string ("from-name",
+                                                        "From Name",
+                                                        "The name of the user created this entry.",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
                                    PROP_ID,
                                    g_param_spec_string ("id",
                                                         "ID",
@@ -314,6 +353,20 @@ const gchar *
 zpj_skydrive_entry_get_description (ZpjSkydriveEntry *self)
 {
   return self->priv->description;
+}
+
+
+const gchar *
+zpj_skydrive_entry_get_from_id (ZpjSkydriveEntry *self)
+{
+  return self->priv->from_id;
+}
+
+
+const gchar *
+zpj_skydrive_entry_get_from_name (ZpjSkydriveEntry *self)
+{
+  return self->priv->from_name;
 }
 
 
