@@ -40,7 +40,9 @@ PKG_CHECK_MODULES(GLIB, [glib-2.0 >= $GLIB_MIN_VERSION])
 PKG_CHECK_MODULES(GIO, [gio-2.0])
 PKG_CHECK_MODULES(JSON, [json-glib-1.0])
 PKG_CHECK_MODULES(REST, [rest-0.7])
+
 PKG_CHECK_MODULES(SOUP, [libsoup-2.4])
+AC_DEFINE([LIBSOUP_USE_UNSTABLE_REQUEST_API], [], [We want to use the unstable Request API])
 
 PKG_CHECK_MODULES(GOA, [goa-1.0])
 AC_DEFINE([GOA_API_IS_SUBJECT_TO_CHANGE], [], [We are aware that GOA's API can change])

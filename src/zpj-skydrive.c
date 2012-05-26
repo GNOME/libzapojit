@@ -23,6 +23,9 @@
 
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
+#include <libsoup/soup-request.h>
+#include <libsoup/soup-request-http.h>
+#include <libsoup/soup-requester.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-proxy-call.h>
 
@@ -282,6 +285,56 @@ zpj_skydrive_delete_entry_id (ZpjSkydrive *self, const gchar *entry_id, GCancell
   g_free (url);
   g_clear_object (&message);
   g_clear_object (&session);
+  return ret_val;
+}
+
+
+GInputStream *
+zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
+                                         const gchar *file_id,
+                                         GCancellable *cancellable,
+                                         GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+  GInputStream *ret_val = NULL;
+  SoupMessage *message = NULL;
+  SoupRequest *request = NULL;
+  SoupRequester *requester = NULL;
+  SoupSession *session= NULL;
+  gchar *url = NULL;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
+  g_return_val_if_fail (file_id != NULL && file_id[0] != '\0', NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+  session = soup_session_sync_new ();
+  requester = soup_requester_new ();
+  soup_session_add_feature (session, SOUP_SESSION_FEATURE (requester));
+
+  url = g_strconcat (live_endpoint, file_id, "/content", NULL);
+  request = soup_requester_request (requester, url, error);
+  if (request == NULL)
+    goto out;
+
+  message = soup_request_http_get_message (SOUP_REQUEST_HTTP (request));
+  zpj_authorizer_process_message (priv->authorizer, NULL, message);
+
+  ret_val = soup_request_send (request, cancellable, error);
+  if (ret_val == NULL)
+    goto out;
+
+  /* The session is needed to use the input stream */
+  g_object_weak_ref (G_OBJECT (ret_val), (GWeakNotify) g_object_unref, session);
+
+ out:
+  g_clear_object (&message);
+  g_clear_object (&request);
+  g_free (url);
+  g_clear_object (&requester);
+
   return ret_val;
 }
 

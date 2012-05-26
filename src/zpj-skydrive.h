@@ -21,6 +21,7 @@
 #ifndef ZPJ_SKYDRIVE_H
 #define ZPJ_SKYDRIVE_H
 
+#include <gio/gio.h>
 #include <glib.h>
 #include <glib-object.h>
 
@@ -85,6 +86,11 @@ gboolean            zpj_skydrive_create_folder_from_name     (ZpjSkydrive *self,
 
 gboolean            zpj_skydrive_delete_entry_id             (ZpjSkydrive *self,
                                                               const gchar *entry_id,
+                                                              GCancellable *cancellable,
+                                                              GError **error);
+
+GInputStream       *zpj_skydrive_download_file_id_to_stream  (ZpjSkydrive *self,
+                                                              const gchar *file_id,
                                                               GCancellable *cancellable,
                                                               GError **error);
 
