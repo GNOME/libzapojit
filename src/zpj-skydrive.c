@@ -339,6 +339,25 @@ zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
 }
 
 
+GInputStream *
+zpj_skydrive_download_file_to_stream (ZpjSkydrive *self,
+                                      ZpjSkydriveFile *file,
+                                      GCancellable *cancellable,
+                                      GError **error)
+{
+  const gchar *file_id;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE_FILE (file), NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  file_id = zpj_skydrive_entry_get_id (ZPJ_SKYDRIVE_ENTRY (file));
+  g_return_val_if_fail (file_id != NULL && file_id[0] != '\0', NULL);
+
+  return zpj_skydrive_download_file_id_to_stream (self, file_id, cancellable, error);
+}
+
+
 gboolean
 zpj_skydrive_download_file_id_to_path (ZpjSkydrive *self,
                                        const gchar *file_id,

@@ -94,6 +94,11 @@ GInputStream       *zpj_skydrive_download_file_id_to_stream  (ZpjSkydrive *self,
                                                               GCancellable *cancellable,
                                                               GError **error);
 
+GInputStream       *zpj_skydrive_download_file_to_stream     (ZpjSkydrive *self,
+                                                              ZpjSkydriveFile *file,
+                                                              GCancellable *cancellable,
+                                                              GError **error);
+
 gboolean            zpj_skydrive_download_file_id_to_path    (ZpjSkydrive *self,
                                                               const gchar *file_id,
                                                               const gchar *path,
