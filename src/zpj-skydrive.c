@@ -50,6 +50,7 @@ G_DEFINE_TYPE (ZpjSkydrive, zpj_skydrive, G_TYPE_OBJECT);
 
 
 typedef struct _ZpjSkydriveAsyncData ZpjSkydriveAsyncData;
+typedef struct _ZpjSkydriveThreadData ZpjSkydriveThreadData;
 
 struct _ZpjSkydriveAsyncData
 {
@@ -57,6 +58,13 @@ struct _ZpjSkydriveAsyncData
   GError **error;
   GMainLoop *loop;
   GOutputStream *ostream;
+};
+
+struct _ZpjSkydriveThreadData
+{
+  GValue result;
+  gchar *entry_id;
+  gchar *path;
 };
 
 static const gchar *live_endpoint = "https://apis.live.net/v5.0/";
@@ -109,6 +117,25 @@ zpj_skydrive_download_file_got_chunk (SoupMessage *message, SoupBuffer *chunk, g
 
 
 static void
+zpj_skydrive_list_folder_id_in_thread_func (GSimpleAsyncResult *simple, GObject *object, GCancellable *cancellable)
+{
+  ZpjSkydrive *self = ZPJ_SKYDRIVE (object);
+  GError *error;
+  GList *list;
+  ZpjSkydriveThreadData *data;
+
+  data = (ZpjSkydriveThreadData *) g_simple_async_result_get_op_res_gpointer (simple);
+
+  error = NULL;
+  list = zpj_skydrive_list_folder_id (self, data->entry_id, cancellable, &error);
+  if (error != NULL)
+    g_simple_async_result_take_error (simple, error);
+
+  g_value_set_pointer (&data->result, (gpointer) list);
+}
+
+
+static void
 zpj_skydrive_list_json_array_foreach_folder (JsonArray *array,
                                              guint index,
                                              JsonNode *element_node,
@@ -119,6 +146,31 @@ zpj_skydrive_list_json_array_foreach_folder (JsonArray *array,
 
   entry = zpj_skydrive_create_entry_from_json_node (element_node);
   *list = g_list_prepend (*list, entry);
+}
+
+
+static void
+zpj_skydrive_thread_data_free (ZpjSkydriveThreadData *data)
+{
+  /* Don't touch result */
+  g_free (data->path);
+  g_free (data->entry_id);
+  g_slice_free (ZpjSkydriveThreadData, data);
+}
+
+
+static ZpjSkydriveThreadData *
+zpj_skydrive_thread_data_new (GType result_type, const gchar *entry_id, const gchar *path)
+{
+  ZpjSkydriveThreadData *data;
+
+  data = g_slice_new0 (ZpjSkydriveThreadData);
+  g_value_init (&data->result, result_type);
+  data->entry_id = g_strdup (entry_id);
+  if (path != NULL)
+    data->path = g_strdup (path);
+
+  return data;
 }
 
 
@@ -528,6 +580,55 @@ zpj_skydrive_list_folder_id (ZpjSkydrive *self, const gchar *folder_id, GCancell
   g_clear_object (&proxy);
   g_free (url);
   return list;
+}
+
+
+void
+zpj_skydrive_list_folder_id_async (ZpjSkydrive *self,
+                                   const gchar *folder_id,
+                                   GCancellable *cancellable,
+                                   GAsyncReadyCallback callback,
+                                   gpointer user_data)
+{
+  GSimpleAsyncResult *simple;
+  ZpjSkydriveThreadData *data;
+
+  g_return_if_fail (ZPJ_IS_SKYDRIVE (self));
+  g_return_if_fail (folder_id != NULL && folder_id[0] != '\0');
+
+  simple = g_simple_async_result_new (G_OBJECT (self), callback, user_data, zpj_skydrive_list_folder_id_async);
+  g_simple_async_result_set_check_cancellable (simple, cancellable);
+
+  data = zpj_skydrive_thread_data_new (G_TYPE_POINTER, folder_id, NULL);
+  g_simple_async_result_set_op_res_gpointer (simple, data, (GDestroyNotify) zpj_skydrive_thread_data_free);
+
+  g_simple_async_result_run_in_thread (simple,
+                                       zpj_skydrive_list_folder_id_in_thread_func,
+                                       G_PRIORITY_DEFAULT,
+                                       cancellable);
+  g_object_unref (simple);
+}
+
+
+GList *
+zpj_skydrive_list_folder_id_finish (ZpjSkydrive *self, GAsyncResult *res, GError **error)
+{
+  GList *ret_val = NULL;
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
+  ZpjSkydriveThreadData *data;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (res, G_OBJECT (self), zpj_skydrive_list_folder_id_async),
+                        NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    goto out;
+
+  data = (ZpjSkydriveThreadData *) g_simple_async_result_get_op_res_gpointer (simple);
+  ret_val = (GList *) g_value_get_pointer (&data->result);
+
+ out:
+  return ret_val;
 }
 
 

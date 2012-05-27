@@ -121,6 +121,16 @@ GList              *zpj_skydrive_list_folder_id              (ZpjSkydrive *self,
                                                               GCancellable *cancellable,
                                                               GError **error);
 
+void                zpj_skydrive_list_folder_id_async        (ZpjSkydrive *self,
+                                                              const gchar *folder_id,
+                                                              GCancellable *cancellable,
+                                                              GAsyncReadyCallback callback,
+                                                              gpointer user_data);
+
+GList              *zpj_skydrive_list_folder_id_finish       (ZpjSkydrive *self,
+                                                              GAsyncResult *res,
+                                                              GError **error);
+
 ZpjAuthorizer      *zpj_skydrive_get_authorizer              (ZpjSkydrive *self);
 
 ZpjSkydriveEntry   *zpj_skydrive_query_info_from_id          (ZpjSkydrive *self,
