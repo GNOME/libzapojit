@@ -30,6 +30,24 @@
 #include "zpj-skydrive-photo.h"
 
 
+/**
+ * SECTION:zpj-skydrive-entry
+ * @title: ZpjSkydriveEntry
+ * @short_description: Abstract base class for file, folder and photo
+ *   objects.
+ *
+ * #ZpjSkydriveEntry is an abstract base class for Skydrive file,
+ * folder and photo
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * objects</ulink>.
+ *
+ * Subclasses may implement
+ * #ZpjSkydriveEntryClass.parse_json_node (should chain up to its
+ * parent class) to parse data specific to them in the JSON returned
+ * by the server.
+ */
+
+
 struct _ZpjSkydriveEntryPrivate
 {
   GDateTime *created_time;
@@ -342,6 +360,18 @@ zpj_skydrive_entry_class_init (ZpjSkydriveEntryClass *class)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_created_time:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the time at which @self was created. This is the value of the
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * updated_time</ulink> member in the JSON returned by the server.
+ *
+ * Returns: (transfer none): a #GDateTime representing the time at
+ * which the entry was created. The returned time is owned by the
+ * #ZpjSkydriveEntry and should not be unreferenced.
+ */
 GDateTime *
 zpj_skydrive_entry_get_created_time (ZpjSkydriveEntry *self)
 {
@@ -349,6 +379,17 @@ zpj_skydrive_entry_get_created_time (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_description:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the description of @self. This is the value of the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * description</ulink> member in the JSON returned by the server.
+ *
+ * Returns: (transfer none): description of the entry. This string is
+ * owned by the #ZpjSkydriveEntry and should not be modified or freed.
+ */
 const gchar *
 zpj_skydrive_entry_get_description (ZpjSkydriveEntry *self)
 {
@@ -356,6 +397,19 @@ zpj_skydrive_entry_get_description (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_from_id:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the ID of the user who created or uploaded @self. This is part
+ * of the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * from</ulink> object in the JSON returned by the server.
+ *
+ * Returns: (transfer none): ID of the user who created the entry.
+ * This string is by the #ZpjSkydriveEntry and should not be modified
+ * or freed.
+ */
 const gchar *
 zpj_skydrive_entry_get_from_id (ZpjSkydriveEntry *self)
 {
@@ -363,6 +417,19 @@ zpj_skydrive_entry_get_from_id (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_from_name:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the name of the user who created or uploaded @self. This is
+ * part of the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * from</ulink> object in the JSON returned by the server.
+ *
+ * Returns: (transfer none): name of the user who created the entry.
+ * This string is by the #ZpjSkydriveEntry and should not be modified
+ * or freed.
+ */
 const gchar *
 zpj_skydrive_entry_get_from_name (ZpjSkydriveEntry *self)
 {
@@ -370,6 +437,17 @@ zpj_skydrive_entry_get_from_name (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_id:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the ID of @self. This is the value of the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * id</ulink> member in the JSON returned by the server.
+ *
+ * Returns: (transfer none): the entry's ID. This string is
+ * owned by the #ZpjSkydriveEntry and should not be modified or freed.
+ */
 const gchar *
 zpj_skydrive_entry_get_id (ZpjSkydriveEntry *self)
 {
@@ -377,6 +455,17 @@ zpj_skydrive_entry_get_id (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_name:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the name of @self. This is the value of the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * name</ulink> member in the JSON returned by the server.
+ *
+ * Returns: (transfer none): name of the entry. This string is
+ * owned by the #ZpjSkydriveEntry and should not be modified or freed.
+ */
 const gchar *
 zpj_skydrive_entry_get_name (ZpjSkydriveEntry *self)
 {
@@ -384,6 +473,18 @@ zpj_skydrive_entry_get_name (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_parent_id:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the ID of the folder containing @self. This is the value of
+ * the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * parent_id</ulink> member in the JSON returned by the server.
+ *
+ * Returns: (transfer none): ID of the parent folder. This string is
+ * owned by the #ZpjSkydriveEntry and should not be modified or freed.
+ */
 const gchar *
 zpj_skydrive_entry_get_parent_id (ZpjSkydriveEntry *self)
 {
@@ -391,6 +492,19 @@ zpj_skydrive_entry_get_parent_id (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_get_updated_time:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Gets the time at which @self was last updated. This is the value of
+ * the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * updated_time</ulink> member in the JSON returned by the server.
+ *
+ * Returns: (transfer none): a #GDateTime representing the time at
+ * which the entry was last updated. The returned time is owned by the
+ * #ZpjSkydriveEntry and should not be unreferenced.
+ */
 GDateTime *
 zpj_skydrive_entry_get_updated_time (ZpjSkydriveEntry *self)
 {
@@ -398,6 +512,14 @@ zpj_skydrive_entry_get_updated_time (ZpjSkydriveEntry *self)
 }
 
 
+/**
+ * zpj_skydrive_entry_is_folder:
+ * @self: A #ZpjSkydriveEntry.
+ *
+ * Whether @self is a folder.
+ *
+ * Returns: %TRUE if the entry is a folder.
+ */
 gboolean
 zpj_skydrive_entry_is_folder (ZpjSkydriveEntry *self)
 {

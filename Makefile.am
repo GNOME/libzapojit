@@ -1,4 +1,4 @@
-SUBDIRS = src po
+SUBDIRS = src docs po
 
 INTLTOOL_FILES = \
 	intltool-extract.in \
@@ -26,13 +26,20 @@ EXTRA_DIST = \
 	$(libzapojitdoc_DATA) \
 	$(NULL)
 
-DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
+DISTCHECK_CONFIGURE_FLAGS = \
+	--enable-gtk-doc \
+	--enable-introspection \
+	$(NULL)
 
 DISTCLEANFILES = \
 	intltool-extract \
 	intltool-merge \
 	intltool-update \
 	po/.intltool-merge-cache \
+	$(NULL)
+
+MAINTAINERCLEANFILES = \
+	gtk-doc.make \
 	$(NULL)
 
 dist-hook:

@@ -39,6 +39,8 @@ AM_GLIB_GNU_GETTEXT
 
 LT_INIT
 
+GTK_DOC_CHECK([1.11],[--flavour no-tmpl])
+
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= $GLIB_MIN_VERSION])
 PKG_CHECK_MODULES(GIO, [gio-2.0])
 PKG_CHECK_MODULES(JSON, [json-glib-1.0])
@@ -55,6 +57,9 @@ AC_SUBST(GOA_API_CHANGE_CPPFLAGS)
 AC_CONFIG_FILES([
 zapojit-0.0.pc
 Makefile
+docs/Makefile
+docs/reference/Makefile
+docs/reference/version.xml
 src/Makefile
 po/Makefile.in
 ])

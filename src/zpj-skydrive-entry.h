@@ -48,6 +48,19 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
    ZPJ_TYPE_SKYDRIVE_ENTRY, ZpjSkydriveEntryClass))
 
+/**
+ * ZpjSkydriveEntryType:
+ * @ZPJ_SKYDRIVE_ENTRY_TYPE_FILE: A file.
+ * @ZPJ_SKYDRIVE_ENTRY_TYPE_FOLDER: A folder.
+ * @ZPJ_SKYDRIVE_ENTRY_TYPE_PHOTO: A photo.
+ * @ZPJ_SKYDRIVE_ENTRY_TYPE_INVALID: Invalid or unknown object.
+ *
+ * The types of Skydrive
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh243648">
+ * objects</ulink>.
+ *
+ * This enumeration can be expanded at a later date.
+ */
 typedef enum
 {
   ZPJ_SKYDRIVE_ENTRY_TYPE_FILE,
@@ -60,12 +73,27 @@ typedef struct _ZpjSkydriveEntry        ZpjSkydriveEntry;
 typedef struct _ZpjSkydriveEntryClass   ZpjSkydriveEntryClass;
 typedef struct _ZpjSkydriveEntryPrivate ZpjSkydriveEntryPrivate;
 
+/**
+ * ZpjSkydriveEntry:
+ *
+ * The #ZpjSkydriveEntry structure contains only private data and
+ * should only be accessed using the provided API.
+ */
 struct _ZpjSkydriveEntry
 {
   GObject parent_instance;
   ZpjSkydriveEntryPrivate *priv;
 };
 
+/**
+ * ZpjSkydriveEntryClass:
+ * @parent_class: The parent class.
+ * @parse_json_node: Virtual function that subclasses may implement
+ *   to parse data specific to them in the JSON returned by the server.
+ *   Implementations must chain up to their parent classes.
+ *
+ * Class structure for #ZpjSkydriveEntryClass.
+ */
 struct _ZpjSkydriveEntryClass
 {
   GObjectClass parent_class;
