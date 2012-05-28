@@ -26,6 +26,8 @@ EXTRA_DIST = \
 	$(libzapojitdoc_DATA) \
 	$(NULL)
 
+DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
+
 DISTCLEANFILES = \
 	intltool-extract \
 	intltool-merge \
