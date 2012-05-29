@@ -275,7 +275,7 @@ zpj_skydrive_class_init (ZpjSkydriveClass *class)
  * zpj_skydrive_new:
  * @authorizer: A #ZpjAuthorizer to authorize the service's requests.
  *
- * Creates a new #ZpjSkydrive using the given #ZpjAuthorizer.
+ * Creates a new #ZpjSkydrive using the given @authorizer.
  *
  * Returns: (transfer full): A new #ZpjSkydrive. Free the returned
  * object with g_object_unref().
