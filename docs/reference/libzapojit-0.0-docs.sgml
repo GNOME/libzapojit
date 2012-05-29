@@ -5,7 +5,7 @@
 ]>
 <book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
-    <title>libzapojit Reference Manual</title>
+    <title>Zapojit Reference Manual</title>
     <releaseinfo>Version &version;</releaseinfo>
 
     <authorgroup>
