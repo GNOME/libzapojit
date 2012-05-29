@@ -48,6 +48,11 @@
     </legalnotice>
   </bookinfo>
 
+  <chapter id="authorization">
+    <title>Authorization API</title>
+    <xi:include href="xml/zpj-authorizer.xml"/>
+  </chapter>
+
   <chapter id="skydrive">
     <title>Skydrive API</title>
     <xi:include href="xml/zpj-skydrive.xml"/>

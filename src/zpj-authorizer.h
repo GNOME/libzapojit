@@ -47,6 +47,23 @@ G_BEGIN_DECLS
 typedef struct _ZpjAuthorizer          ZpjAuthorizer;
 typedef struct _ZpjAuthorizerInterface ZpjAuthorizerInterface;
 
+/**
+ * ZpjAuthorizerInterface:
+ * @parent_iface: The parent interface.
+ * @is_authorized_for_domain: A method to check if the authorization
+ *   tokens are valid for a #ZpjAuthorizationDomain.
+ * @process_call: A method to append authorization headers to a
+ *   #RestProxyCall.
+ * @process_message: A method to append authorization headers to a
+ *   #SoupMessage. Types of messages include DELETE, GET and POST.
+ * @refresh_authorization: A synchronous method to force a refresh of
+ *   any authorization tokens held by the authorizer. It should return
+ *   %TRUE on success. An asynchronous version will be defined by
+ *   invoking this in a thread.
+ *
+ * Interface structure for #ZpjAuthorizer. All methods should be
+ * thread safe.
+ */
 struct _ZpjAuthorizerInterface
 {
   GTypeInterface parent_iface;
