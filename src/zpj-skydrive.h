@@ -58,12 +58,24 @@ typedef struct _ZpjSkydrive        ZpjSkydrive;
 typedef struct _ZpjSkydriveClass   ZpjSkydriveClass;
 typedef struct _ZpjSkydrivePrivate ZpjSkydrivePrivate;
 
+/**
+ * ZpjSkydrive:
+ *
+ * The #ZpjSkydrive structure contains only private data and should
+ * only be accessed using the provided API.
+ */
 struct _ZpjSkydrive
 {
   GObject parent_instance;
   ZpjSkydrivePrivate *priv;
 };
 
+/**
+ * ZpjSkydriveClass:
+ * @parent_class: The parent class.
+ *
+ * Class structure for #ZpjSkydriveClass.
+ */
 struct _ZpjSkydriveClass
 {
   GObjectClass parent_class;

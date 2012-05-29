@@ -10,6 +10,7 @@
 
   <chapter>
     <title>Skydrive API</title>
+    <xi:include href="xml/zpj-skydrive.xml"/>
     <xi:include href="xml/zpj-skydrive-entry.xml"/>
   </chapter>
 

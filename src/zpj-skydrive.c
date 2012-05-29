@@ -34,6 +34,24 @@
 #include "zpj-skydrive-photo.h"
 
 
+/**
+ * SECTION:zpj-skydrive
+ * @title: ZpjSkydrive
+ * @short_description: Skydrive service object.
+ *
+ * #ZpjSkydrive represents the
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink> file hosting service. It has to be used with an
+ * implementation of #ZpjAuthorizer.
+ *
+ * Currently it supports the following operations:
+ * - Deleting a file, folder or photo.
+ * - Listing the contents of a folder.
+ * - Reading the properties of a file, folder or photo.
+ * - Uploading files and photos.
+ */
+
+
 struct _ZpjSkydrivePrivate
 {
   ZpjAuthorizer *authorizer;
@@ -252,6 +270,15 @@ zpj_skydrive_class_init (ZpjSkydriveClass *class)
 }
 
 
+/**
+ * zpj_skydrive_new:
+ * @authorizer: A #ZpjAuthorizer to authorize the service's requests.
+ *
+ * Creates a new #ZpjSkydrive using the given #ZpjAuthorizer.
+ *
+ * Returns: (transfer full): A new #ZpjSkydrive. Free the returned
+ * object with g_object_unref().
+ */
 ZpjSkydrive *
 zpj_skydrive_new (ZpjAuthorizer *authorizer)
 {
@@ -301,6 +328,20 @@ zpj_skydrive_create_folder_from_name (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_delete_entry_id:
+ * @self: A #ZpjSkydrive.
+ * @entry_id: The ID of the #ZpjSkydriveEntry to be deleted.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously deletes the entry corresponding to @entry_id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>.
+ *
+ * Returns: %TRUE if the #ZpjSkydriveEntry was deleted successfully.
+ */
 gboolean
 zpj_skydrive_delete_entry_id (ZpjSkydrive *self, const gchar *entry_id, GCancellable *cancellable, GError **error)
 {
@@ -341,6 +382,22 @@ zpj_skydrive_delete_entry_id (ZpjSkydrive *self, const gchar *entry_id, GCancell
 }
 
 
+/**
+ * zpj_skydrive_download_file_id_to_stream:
+ * @self: A #ZpjSkydrive.
+ * @file_id: The ID of the #ZpjSkydriveFile to be downloaded.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously returns a stream for downloading the file
+ * corresponding to @file_id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>.
+ *
+ * Returns: (transfer full): A #GInputStream to read the file data
+ * from. Free the returned object with g_object_unref().
+ */
 GInputStream *
 zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
                                          const gchar *file_id,
@@ -391,6 +448,21 @@ zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_download_file_to_stream:
+ * @self: A #ZpjSkydrive.
+ * @file: The #ZpjSkydriveFile to be downloaded.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously returns a stream for downloading @file from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>.
+ *
+ * Returns: (transfer full): A #GInputStream to read the file data
+ * from. Free the returned object with g_object_unref().
+ */
 GInputStream *
 zpj_skydrive_download_file_to_stream (ZpjSkydrive *self,
                                       ZpjSkydriveFile *file,
@@ -410,6 +482,24 @@ zpj_skydrive_download_file_to_stream (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_download_file_id_to_path:
+ * @self: A #ZpjSkydrive.
+ * @file_id: The ID of the #ZpjSkydriveFile to be downloaded.
+ * @path: The destination.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously downloads the file corresponding to @file_id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink> and saves it in @path. The file is temporarily
+ * saved in the preferred directory for temporary files (as returned
+ * by g_get_tmp_dir()) while the download is going on, and then moved
+ * to @path.
+ *
+ * Returns: %TRUE if the #ZpjSkydriveFile was downloaded successfully.
+ */
 gboolean
 zpj_skydrive_download_file_id_to_path (ZpjSkydrive *self,
                                        const gchar *file_id,
@@ -491,6 +581,24 @@ zpj_skydrive_download_file_id_to_path (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_download_file_to_path:
+ * @self: A #ZpjSkydrive.
+ * @file: The #ZpjSkydriveFile to be downloaded.
+ * @path: The destination.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously downloads @file from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink> and saves it in @path. The file is temporarily
+ * saved in the preferred directory for temporary files (as returned
+ * by g_get_tmp_dir()) while the download is going on, and then moved
+ * to @path.
+ *
+ * Returns: %TRUE if the #ZpjSkydriveFile was downloaded successfully.
+ */
 gboolean
 zpj_skydrive_download_file_to_path (ZpjSkydrive *self,
                                     ZpjSkydriveFile *file,
@@ -512,6 +620,23 @@ zpj_skydrive_download_file_to_path (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_list_folder:
+ * @self: A #ZpjSkydrive.
+ * @folder: The #ZpjSkydriveFolder to be listed.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously lists the contents of @folder_id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>.
+ *
+ * Returns: (transfer full) (element-type ZpjSkydriveEntry): A
+ * list of the #ZpjSkydrive entries within the #ZpjSkydriveFolder.
+ * Free the returned list with g_list_free() after each element has
+ * been freed with g_object_unref().
+ */
 GList *
 zpj_skydrive_list_folder (ZpjSkydrive *self, ZpjSkydriveFolder *folder, GCancellable *cancellable, GError **error)
 {
@@ -528,6 +653,24 @@ zpj_skydrive_list_folder (ZpjSkydrive *self, ZpjSkydriveFolder *folder, GCancell
 }
 
 
+/**
+ * zpj_skydrive_list_folder_id:
+ * @self: A #ZpjSkydrive.
+ * @folder_id: The ID of the #ZpjSkydriveFolder to be listed.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously lists the contents of the folder corresponding to
+ * @folder_id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>.
+ *
+ * Returns: (transfer full) (element-type ZpjSkydriveEntry): A
+ * list of the #ZpjSkydrive entries within the #ZpjSkydriveFolder, or
+ * %NULL on error. Free the returned list with g_list_free() after
+ * each element has been freed with g_object_unref().
+ */
 GList *
 zpj_skydrive_list_folder_id (ZpjSkydrive *self, const gchar *folder_id, GCancellable *cancellable, GError **error)
 {
@@ -583,6 +726,26 @@ zpj_skydrive_list_folder_id (ZpjSkydrive *self, const gchar *folder_id, GCancell
 }
 
 
+/**
+ * zpj_skydrive_list_folder_id_async:
+ * @self: A #ZpjSkydrive.
+ * @folder_id: The ID of the #ZpjSkydriveFolder to be listed.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @callback: (scope async): A #GAsyncReadyCallback to call when the
+ *   request is satisfied.
+ * @user_data: (closure): The data to pass to @callback.
+ *
+ * Asynchronously lists the contents of the folder corresponding to
+ * @folder_id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>. See zpj_skydrive_list_folder_id() for the
+ * synchronous version of this call.
+ *
+ * When the operation is finished, @callback will be called. You can
+ * then call zpj_skydrive_list_folder_id_finish() to get the result
+ * of the operation.
+ */
 void
 zpj_skydrive_list_folder_id_async (ZpjSkydrive *self,
                                    const gchar *folder_id,
@@ -610,6 +773,20 @@ zpj_skydrive_list_folder_id_async (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_list_folder_id_finish:
+ * @self: A #ZpjSkydrive.
+ * @res: A #GAsyncResult.
+ * @error: (allow-none): An optional #GError, or %NULL.
+ *
+ * Finishes an asynchronous operation started with
+ * zpj_skydrive_list_folder_id_async().
+ *
+ * Returns: (transfer full) (element-type ZpjSkydriveEntry): A
+ * list of the #ZpjSkydrive entries within the #ZpjSkydriveFolder, or
+ * %NULL on error. Free the returned list with g_list_free() after
+ * each element has been freed with g_object_unref().
+ */
 GList *
 zpj_skydrive_list_folder_id_finish (ZpjSkydrive *self, GAsyncResult *res, GError **error)
 {
@@ -632,6 +809,15 @@ zpj_skydrive_list_folder_id_finish (ZpjSkydrive *self, GAsyncResult *res, GError
 }
 
 
+/**
+ * zpj_skydrive_get_authorizer:
+ * @self: A #ZpjSkydrive.
+ *
+ * Gets the authorizer used to authorize requests to @self.
+ *
+ * Returns: (transfer none): A #ZpjAuthorizer. The returned object is
+ * owned by #ZpjSkydrive and should not be modified or freed.
+ */
 ZpjAuthorizer *
 zpj_skydrive_get_authorizer (ZpjSkydrive *self)
 {
@@ -640,6 +826,22 @@ zpj_skydrive_get_authorizer (ZpjSkydrive *self)
 }
 
 
+/**
+ * zpj_skydrive_query_info_from_id:
+ * @self: A #ZpjSkydrive.
+ * @id: An ID to be queried.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously reads the properties of the entry corresponding to
+ * @id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>.
+ *
+ * Returns: (transfer full): A new #ZpjSkydriveEntry. Free the
+ * returned object with g_object_unref().
+ */
 ZpjSkydriveEntry *
 zpj_skydrive_query_info_from_id (ZpjSkydrive *self, const gchar *id, GCancellable *cancellable, GError **error)
 {
@@ -691,6 +893,14 @@ zpj_skydrive_query_info_from_id (ZpjSkydrive *self, const gchar *id, GCancellabl
 }
 
 
+/**
+ * zpj_skydrive_set_authorizer:
+ * @self: A #ZpjSkydrive.
+ * @authorizer: A new #ZpjAuthorizer.
+ *
+ * Uses the new @authorizer to replace the old one that was used to
+ * authorize requests to @self.
+ */
 void
 zpj_skydrive_set_authorizer (ZpjSkydrive *self, ZpjAuthorizer *authorizer)
 {
@@ -711,6 +921,21 @@ zpj_skydrive_set_authorizer (ZpjSkydrive *self, ZpjAuthorizer *authorizer)
 }
 
 
+/**
+ * zpj_skydrive_upload_path_to_folder:
+ * @self: A #ZpjSkydrive.
+ * @path: The source.
+ * @folder: The destination #ZpjSkydriveFolder.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously uploads the file at @path to
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink> and places it under @folder.
+ *
+ * Returns: %TRUE if the file was uploaded successfully.
+ */
 gboolean
 zpj_skydrive_upload_path_to_folder (ZpjSkydrive *self,
                                     const gchar *path,
@@ -731,6 +956,22 @@ zpj_skydrive_upload_path_to_folder (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_upload_path_to_folder_id:
+ * @self: A #ZpjSkydrive.
+ * @path: The source.
+ * @folder_id: The ID of the destination #ZpjSkydriveFolder.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously uploads the file at @path to
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink> and places it under the folder corresponding to
+ * @folder_id.
+ *
+ * Returns: %TRUE if the file was uploaded successfully.
+ */
 gboolean
 zpj_skydrive_upload_path_to_folder_id (ZpjSkydrive *self,
                                        const gchar *path,
