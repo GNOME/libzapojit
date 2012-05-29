@@ -35,6 +35,7 @@
  * @title: ZpjSkydriveEntry
  * @short_description: Abstract base class for file, folder and photo
  *   objects.
+ * @include: zpj/zpj.h
  *
  * #ZpjSkydriveEntry is an abstract base class for Skydrive file,
  * folder and photo

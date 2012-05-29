@@ -38,6 +38,7 @@
  * SECTION:zpj-skydrive
  * @title: ZpjSkydrive
  * @short_description: Skydrive service object.
+ * @include: zpj/zpj.h
  *
  * #ZpjSkydrive represents the
  * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
