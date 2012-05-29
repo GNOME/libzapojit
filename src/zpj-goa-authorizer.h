@@ -52,12 +52,24 @@ typedef struct _ZpjGoaAuthorizer        ZpjGoaAuthorizer;
 typedef struct _ZpjGoaAuthorizerClass   ZpjGoaAuthorizerClass;
 typedef struct _ZpjGoaAuthorizerPrivate ZpjGoaAuthorizerPrivate;
 
+/**
+ * ZpjGoaAuthorizer:
+ *
+ * The #ZpjGoaAuthorizer structure contains only private data and
+ * should only be accessed using the provided API.
+ */
 struct _ZpjGoaAuthorizer
 {
   GObject parent_instance;
   ZpjGoaAuthorizerPrivate *priv;
 };
 
+/**
+ * ZpjGoaAuthorizerClass:
+ * @parent_class: The parent class.
+ *
+ * Class structure for #ZpjGoaAuthorizerClass.
+ */
 struct _ZpjGoaAuthorizerClass
 {
   GObjectClass parent_class;

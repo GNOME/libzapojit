@@ -51,6 +51,7 @@
   <chapter id="authorization">
     <title>Authorization API</title>
     <xi:include href="xml/zpj-authorizer.xml"/>
+    <xi:include href="xml/zpj-goa-authorizer.xml"/>
   </chapter>
 
   <chapter id="skydrive">

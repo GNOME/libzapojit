@@ -29,6 +29,18 @@
 #include "zpj-goa-authorizer.h"
 
 
+/**
+ * SECTION:zpj-goa-authorizer
+ * @title: ZpjGoaAuthorizer
+ * @short_description: A GNOME Online Accounts authorizer object for
+ *   Windows Live Connect.
+ * @include: zpj/zpj.h
+ *
+ * #ZpjGoaAuthorizer provides an implementation of the #ZpjAuthorizer
+ * interface using GNOME Online Accounts.
+ */
+
+
 struct _ZpjGoaAuthorizerPrivate
 {
   GMutex mutex;
@@ -249,6 +261,15 @@ zpj_authorizer_interface_init (ZpjAuthorizerInterface *iface)
 }
 
 
+/**
+ * zpj_goa_authorizer_new:
+ * @goa_object: A #GoaObject representing a Windows Live account.
+ *
+ * Creates a new #ZpjGoaAuthorizer using @goa_object.
+ *
+ * Returns: (transfer full): A new #ZpjGoaAuthorizer. Free the returned
+ * object with g_object_unref().
+ */
 ZpjGoaAuthorizer *
 zpj_goa_authorizer_new (GoaObject *goa_object)
 {
@@ -256,6 +277,15 @@ zpj_goa_authorizer_new (GoaObject *goa_object)
 }
 
 
+/**
+ * zpj_goa_authorizer_get_goa_object:
+ * @self: A #ZpjGoaAuthorizer.
+ *
+ * Gets the GOA account used by @self for authorization.
+ *
+ * Returns: (transfer none): A #GoaObject. The returned object is
+ * owned by #ZpjGoaAuthorizer and should not be modified or freed.
+ */
 GoaObject *
 zpj_goa_authorizer_get_goa_object (ZpjGoaAuthorizer *self)
 {
