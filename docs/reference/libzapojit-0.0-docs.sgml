@@ -6,6 +6,46 @@
 <book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
     <title>libzapojit Reference Manual</title>
+    <releaseinfo>Version &version;</releaseinfo>
+
+    <authorgroup>
+      <author>
+        <firstname>Debarshi</firstname>
+        <surname>Ray</surname>
+        <affiliation>
+          <address>
+            <email>debarshir@gnome.org</email>
+          </address>
+        </affiliation>
+      </author>
+    </authorgroup>
+
+    <copyright>
+      <year>2012</year>
+      <holder>The Zapojit authors</holder>
+    </copyright>
+
+    <legalnotice>
+      <para>
+	Permission is granted to copy, distribute and/or modify this
+	document under the terms of the <citetitle>GNU Free
+	Documentation License</citetitle>, Version 1.1 or any later
+	version published by the Free Software Foundation with no
+	Invariant Sections, no Front-Cover Texts, and no Back-Cover
+	Texts. You may obtain a copy of the <citetitle>GNU Free
+	Documentation License</citetitle> from the Free Software
+	Foundation by visiting
+        <ulink type="http" url="http://www.fsf.org">their Web site
+        </ulink> or by writing to:
+	<address>
+          <street>51 Franklin Street</street>, Fifth Floor
+          <city>Boston</city>,
+          <state>MA</state>
+          <postcode>02110-1335</postcode>
+          <country>USA</country>
+	</address>
+      </para>
+    </legalnotice>
   </bookinfo>
 
   <chapter>
