@@ -859,7 +859,8 @@ zpj_skydrive_get_authorizer (ZpjSkydrive *self)
  * Synchronously reads the properties of the entry corresponding to
  * @id from
  * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
- * Skydrive</ulink>.
+ * Skydrive</ulink>. See zpj_skydrive_query_info_from_id_async() for
+ * the asynchronous version of this call.
  *
  * Returns: (transfer full): A new #ZpjSkydriveEntry. Free the
  * returned object with g_object_unref().
@@ -915,6 +916,26 @@ zpj_skydrive_query_info_from_id (ZpjSkydrive *self, const gchar *id, GCancellabl
 }
 
 
+/**
+ * zpj_skydrive_query_info_from_id_async:
+ * @self: A #ZpjSkydrive.
+ * @id: The ID to be queried.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @callback: (scope async): A #GAsyncReadyCallback to call when the
+ *   request is satisfied.
+ * @user_data: (closure): The data to pass to @callback.
+ *
+ * Asynchronously reads the properties of the entry corresponding to
+ * @id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>. See zpj_skydrive_query_info_from_id() for the
+ * synchronous version of this call.
+ *
+ * When the operation is finished, @callback will be called. You can
+ * then call zpj_skydrive_query_info_from_id_finish() to get the result
+ * of the operation.
+ */
 void
 zpj_skydrive_query_info_from_id_async (ZpjSkydrive *self,
                                        const gchar *id,
@@ -942,6 +963,18 @@ zpj_skydrive_query_info_from_id_async (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_query_info_from_id_finish:
+ * @self: A #ZpjSkydrive.
+ * @res: A #GAsyncResult.
+ * @error: (allow-none): An optional #GError, or %NULL.
+ *
+ * Finishes an asynchronous operation started with
+ * zpj_skydrive_query_info_from_id_async().
+ *
+ * Returns: (transfer full): A new #ZpjSkydriveEntry. Free the returned
+ * object with g_object_unref().
+ */
 ZpjSkydriveEntry *
 zpj_skydrive_query_info_from_id_finish (ZpjSkydrive *self, GAsyncResult *res, GError **error)
 {
