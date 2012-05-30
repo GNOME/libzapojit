@@ -1,3 +1,17 @@
+Overview of changes in 0.0.1
+============================
+
+* Support for Skydrive file and folder objects. Photos are treated as
+  files.
+
+* Support for the following Skydrive operations:
+  - Deleting a file, folder or photo.
+  - Listing the contents of a folder.
+  - Reading the properties of a file, folder or photo.
+  - Uploading files and photos.
+
+* GObject Introspection
+
 ----
 
 Copyright (C) 2012 Red Hat, Inc.
