@@ -24,6 +24,18 @@
 #include "zpj-skydrive-photo.h"
 
 
+/**
+ * SECTION:zpj-skydrive-photo
+ * @title: ZpjSkydrivePhoto
+ * @short_description: Skydrive photo object.
+ * @include: zpj/zpj.h
+ *
+ * #ZpjSkydrivePhoto represents a <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648#photo">
+ * Skydrive photo</ulink> object.
+ */
+
+
 G_DEFINE_TYPE (ZpjSkydrivePhoto, zpj_skydrive_photo, ZPJ_TYPE_SKYDRIVE_FILE);
 
 
@@ -39,6 +51,17 @@ zpj_skydrive_photo_class_init (ZpjSkydrivePhotoClass *class)
 }
 
 
+/**
+ * zpj_skydrive_photo_new:
+ * @node: A #JsonNode returned by the server.
+ *
+ * Creates a new #ZpjSkydrivePhoto from the given @node. If you already
+ * know the ID of the photo then you can use
+ * zpj_skydrive_query_info_from_id().
+ *
+ * Returns: (transfer full): A new #ZpjSkydrivePhoto. Free the returned
+ * object with g_object_unref().
+ */
 ZpjSkydriveEntry *
 zpj_skydrive_photo_new (JsonNode *node)
 {

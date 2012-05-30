@@ -52,11 +52,23 @@ G_BEGIN_DECLS
 typedef struct _ZpjSkydrivePhoto      ZpjSkydrivePhoto;
 typedef struct _ZpjSkydrivePhotoClass ZpjSkydrivePhotoClass;
 
+/**
+ * ZpjSkydrivePhoto:
+ *
+ * The #ZpjSkydrivePhoto structure contains only private data and
+ * should only be accessed using the provided API.
+ */
 struct _ZpjSkydrivePhoto
 {
   ZpjSkydriveFile parent_instance;
 };
 
+/**
+ * ZpjSkydrivePhotoClass:
+ * @parent_class: The parent class.
+ *
+ * Class structure for #ZpjSkydrivePhoto.
+ */
 struct _ZpjSkydrivePhotoClass
 {
   ZpjSkydriveFileClass parent_class;
