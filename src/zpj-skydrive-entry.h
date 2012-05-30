@@ -92,7 +92,7 @@ struct _ZpjSkydriveEntry
  *   to parse data specific to them in the JSON returned by the server.
  *   Implementations must chain up to their parent classes.
  *
- * Class structure for #ZpjSkydriveEntryClass.
+ * Class structure for #ZpjSkydriveEntry.
  */
 struct _ZpjSkydriveEntryClass
 {

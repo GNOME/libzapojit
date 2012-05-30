@@ -74,7 +74,7 @@ struct _ZpjSkydrive
  * ZpjSkydriveClass:
  * @parent_class: The parent class.
  *
- * Class structure for #ZpjSkydriveClass.
+ * Class structure for #ZpjSkydrive.
  */
 struct _ZpjSkydriveClass
 {

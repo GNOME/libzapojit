@@ -68,7 +68,7 @@ struct _ZpjGoaAuthorizer
  * ZpjGoaAuthorizerClass:
  * @parent_class: The parent class.
  *
- * Class structure for #ZpjGoaAuthorizerClass.
+ * Class structure for #ZpjGoaAuthorizer.
  */
 struct _ZpjGoaAuthorizerClass
 {
