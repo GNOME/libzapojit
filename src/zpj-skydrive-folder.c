@@ -27,6 +27,18 @@
 G_DEFINE_TYPE (ZpjSkydriveFolder, zpj_skydrive_folder, ZPJ_TYPE_SKYDRIVE_ENTRY);
 
 
+/**
+ * SECTION:zpj-skydrive-folder
+ * @title: ZpjSkydriveFolder
+ * @short_description: Skydrive folder object.
+ * @include: zpj/zpj.h
+ *
+ * #ZpjSkydriveFolder represents a <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648#folder">
+ * Skydrive folder</ulink> object.
+ */
+
+
 static void
 zpj_skydrive_folder_init (ZpjSkydriveFolder *self)
 {
@@ -39,6 +51,17 @@ zpj_skydrive_folder_class_init (ZpjSkydriveFolderClass *class)
 }
 
 
+/**
+ * zpj_skydrive_folder_new:
+ * @node: A #JsonNode returned by the server.
+ *
+ * Creates a new #ZpjSkydriveFolder from the given @node. If you
+ * already know the ID of the folder then you can use
+ * zpj_skydrive_query_info_from_id().
+ *
+ * Returns: (transfer full): A new #ZpjSkydriveFolder. Free the
+ * returned object with g_object_unref().
+ */
 ZpjSkydriveEntry *
 zpj_skydrive_folder_new (JsonNode *node)
 {

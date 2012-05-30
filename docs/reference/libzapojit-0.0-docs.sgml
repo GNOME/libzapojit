@@ -58,6 +58,8 @@
     <title>Skydrive API</title>
     <xi:include href="xml/zpj-skydrive.xml"/>
     <xi:include href="xml/zpj-skydrive-entry.xml"/>
+    <xi:include href="xml/zpj-skydrive-file.xml"/>
+    <xi:include href="xml/zpj-skydrive-folder.xml"/>
   </chapter>
 
   <index>

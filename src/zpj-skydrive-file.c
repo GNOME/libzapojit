@@ -24,6 +24,18 @@
 #include "zpj-skydrive-file.h"
 
 
+/**
+ * SECTION:zpj-skydrive-file
+ * @title: ZpjSkydriveFile
+ * @short_description: Skydrive file object.
+ * @include: zpj/zpj.h
+ *
+ * #ZpjSkydriveFile represents a <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648#file">
+ * Skydrive file</ulink> object.
+ */
+
+
 struct _ZpjSkydriveFilePrivate
 {
   goffset size;
@@ -100,6 +112,17 @@ zpj_skydrive_file_class_init (ZpjSkydriveFileClass *class)
 }
 
 
+/**
+ * zpj_skydrive_file_new:
+ * @node: A #JsonNode returned by the server.
+ *
+ * Creates a new #ZpjSkydriveFile from the given @node. If you already
+ * know the ID of the file then you can use
+ * zpj_skydrive_query_info_from_id().
+ *
+ * Returns: (transfer full): A new #ZpjSkydriveFile. Free the returned
+ * object with g_object_unref().
+ */
 ZpjSkydriveEntry *
 zpj_skydrive_file_new (JsonNode *node)
 {
@@ -107,6 +130,16 @@ zpj_skydrive_file_new (JsonNode *node)
 }
 
 
+/**
+ * zpj_skydrive_file_get_size:
+ * @self: A #ZpjSkydriveFile.
+ *
+ * Gets the size of @self in bytes. This is the value of the <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh243648#file">
+ * size</ulink> member in the JSON returned by the server.
+ *
+ * Returns: The entry's size in bytes.
+ */
 goffset
 zpj_skydrive_file_get_size (ZpjSkydriveFile *self)
 {

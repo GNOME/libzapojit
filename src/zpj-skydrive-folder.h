@@ -49,19 +49,66 @@ G_BEGIN_DECLS
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
    ZPJ_TYPE_SKYDRIVE_FOLDER, ZpjSkydriveFolderClass))
 
+/**
+ * ZPJ_SKYDRIVE_FOLDER_SKYDRIVE:
+ *
+ * <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh826545#friendly">
+ * Friendly name</ulink> for the Skydrive top-level folder. It can be
+ * used as the #ZpjSkydriveEntry:id and #ZpjSkydriveEntry:parent_id.
+ */
 #define ZPJ_SKYDRIVE_FOLDER_SKYDRIVE "me/skydrive"
+
+/**
+ * ZPJ_SKYDRIVE_FOLDER_MY_DOCUMENTS:
+ *
+ * <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh826545#friendly">
+ * Friendly name</ulink> for the Documents folder. It can be used as
+ * the #ZpjSkydriveEntry:id and #ZpjSkydriveEntry:parent_id.
+ */
 #define ZPJ_SKYDRIVE_FOLDER_MY_DOCUMENTS "me/skydrive/my_documents"
+
+/**
+ * ZPJ_SKYDRIVE_FOLDER_MY_PHOTOS:
+ *
+ * <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh826545#friendly">
+ * Friendly name</ulink> for the Pictures folder. It can be used as the
+ * #ZpjSkydriveEntry:id and #ZpjSkydriveEntry:parent_id.
+ */
 #define ZPJ_SKYDRIVE_FOLDER_MY_PHOTOS "me/skydrive/my_photos"
+
+/**
+ * ZPJ_SKYDRIVE_FOLDER_PUBLIC_DOCUMENTS:
+ *
+ * <ulink
+ * url="http://msdn.microsoft.com/en-us/library/live/hh826545#friendly">
+ * Friendly name</ulink> for the Public folder. It can be used as the
+ * #ZpjSkydriveEntry:id and #ZpjSkydriveEntry:parent_id.
+ */
 #define ZPJ_SKYDRIVE_FOLDER_PUBLIC_DOCUMENTS "me/skydrive/public_documents"
 
 typedef struct _ZpjSkydriveFolder      ZpjSkydriveFolder;
 typedef struct _ZpjSkydriveFolderClass ZpjSkydriveFolderClass;
 
+/**
+ * ZpjSkydriveFolder:
+ *
+ * The #ZpjSkydriveFolder structure contains only private data and
+ * should only be accessed using the provided API.
+ */
 struct _ZpjSkydriveFolder
 {
   ZpjSkydriveEntry parent_instance;
 };
 
+/**
+ * ZpjSkydriveFolderClass:
+ * @parent_class: The parent class.
+ *
+ * Class structure for #ZpjSkydriveFolder.
+ */
 struct _ZpjSkydriveFolderClass
 {
   ZpjSkydriveEntryClass parent_class;

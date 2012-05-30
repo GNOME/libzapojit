@@ -53,12 +53,24 @@ typedef struct _ZpjSkydriveFile        ZpjSkydriveFile;
 typedef struct _ZpjSkydriveFileClass   ZpjSkydriveFileClass;
 typedef struct _ZpjSkydriveFilePrivate ZpjSkydriveFilePrivate;
 
+/**
+ * ZpjSkydriveFile:
+ *
+ * The #ZpjSkydriveFile structure contains only private data and should
+ * only be accessed using the provided API.
+ */
 struct _ZpjSkydriveFile
 {
   ZpjSkydriveEntry parent_instance;
   ZpjSkydriveFilePrivate *priv;
 };
 
+/**
+ * ZpjSkydriveFileClass:
+ * @parent_class: The parent class.
+ *
+ * Class structure for #ZpjSkydriveFile.
+ */
 struct _ZpjSkydriveFileClass
 {
   ZpjSkydriveEntryClass parent_class;
