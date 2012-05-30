@@ -169,6 +169,27 @@ zpj_skydrive_list_json_array_foreach_folder (JsonArray *array,
 
 
 static void
+zpj_skydrive_query_info_from_id_in_thread_func (GSimpleAsyncResult *simple,
+                                                GObject *object,
+                                                GCancellable *cancellable)
+{
+  ZpjSkydrive *self = ZPJ_SKYDRIVE (object);
+  GError *error;
+  ZpjSkydriveEntry *entry;
+  ZpjSkydriveThreadData *data;
+
+  data = (ZpjSkydriveThreadData *) g_simple_async_result_get_op_res_gpointer (simple);
+
+  error = NULL;
+  entry = zpj_skydrive_query_info_from_id (self, data->entry_id, cancellable, &error);
+  if (error != NULL)
+    g_simple_async_result_take_error (simple, error);
+
+  g_value_take_object (&data->result, entry);
+}
+
+
+static void
 zpj_skydrive_thread_data_free (ZpjSkydriveThreadData *data)
 {
   /* Don't touch result */
@@ -891,6 +912,57 @@ zpj_skydrive_query_info_from_id (ZpjSkydrive *self, const gchar *id, GCancellabl
   g_free (url);
 
   return entry;
+}
+
+
+void
+zpj_skydrive_query_info_from_id_async (ZpjSkydrive *self,
+                                       const gchar *id,
+                                       GCancellable *cancellable,
+                                       GAsyncReadyCallback callback,
+                                       gpointer user_data)
+{
+  GSimpleAsyncResult *simple;
+  ZpjSkydriveThreadData *data;
+
+  g_return_if_fail (ZPJ_IS_SKYDRIVE (self));
+  g_return_if_fail (id != NULL && id[0] != '\0');
+
+  simple = g_simple_async_result_new (G_OBJECT (self), callback, user_data, zpj_skydrive_query_info_from_id_async);
+  g_simple_async_result_set_check_cancellable (simple, cancellable);
+
+  data = zpj_skydrive_thread_data_new (ZPJ_TYPE_SKYDRIVE_ENTRY, id, NULL);
+  g_simple_async_result_set_op_res_gpointer (simple, data, (GDestroyNotify) zpj_skydrive_thread_data_free);
+
+  g_simple_async_result_run_in_thread (simple,
+                                       zpj_skydrive_query_info_from_id_in_thread_func,
+                                       G_PRIORITY_DEFAULT,
+                                       cancellable);
+  g_object_unref (simple);
+}
+
+
+ZpjSkydriveEntry *
+zpj_skydrive_query_info_from_id_finish (ZpjSkydrive *self, GAsyncResult *res, GError **error)
+{
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
+  ZpjSkydriveEntry *ret_val = NULL;
+  ZpjSkydriveThreadData *data;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (res,
+                                                        G_OBJECT (self),
+                                                        zpj_skydrive_query_info_from_id_async),
+                        NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    goto out;
+
+  data = (ZpjSkydriveThreadData *) g_simple_async_result_get_op_res_gpointer (simple);
+  ret_val = ZPJ_SKYDRIVE_ENTRY (g_value_get_object (&data->result));
+
+ out:
+  return ret_val;
 }
 
 

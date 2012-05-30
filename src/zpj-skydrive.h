@@ -150,6 +150,16 @@ ZpjSkydriveEntry   *zpj_skydrive_query_info_from_id          (ZpjSkydrive *self,
                                                               GCancellable *cancellable,
                                                               GError **error);
 
+void                zpj_skydrive_query_info_from_id_async    (ZpjSkydrive *self,
+                                                              const gchar *id,
+                                                              GCancellable *cancellable,
+                                                              GAsyncReadyCallback callback,
+                                                              gpointer user_data);
+
+ZpjSkydriveEntry   *zpj_skydrive_query_info_from_id_finish   (ZpjSkydrive *self,
+                                                              GAsyncResult *res,
+                                                              GError **error);
+
 void                zpj_skydrive_set_authorizer              (ZpjSkydrive *self, ZpjAuthorizer *authorizer);
 
 gboolean            zpj_skydrive_upload_path_to_folder       (ZpjSkydrive *self,
