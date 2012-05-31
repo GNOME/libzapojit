@@ -1,10 +1,10 @@
 Overview of changes in 0.0.1
 ============================
 
-* Support for Skydrive file and folder objects. Photos are treated as
+* Support for SkyDrive file and folder objects. Photos are treated as
   files.
 
-* Support for the following Skydrive operations:
+* Support for the following SkyDrive operations:
   - Deleting a file, folder or photo.
   - Listing the contents of a folder.
   - Reading the properties of a file, folder or photo.

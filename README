@@ -1,7 +1,7 @@
-Zapojit - GLib/GObject wrapper for Skydrive and Hotmail
-=======================================================
+Zapojit - GLib/GObject wrapper for the SkyDrive and Hotmail REST APIs
+=====================================================================
 
-Skydrive: http://msdn.microsoft.com/en-us/library/live/hh826521
+SkyDrive: http://msdn.microsoft.com/en-us/library/live/hh826521
 Hotmail: http://msdn.microsoft.com/en-us/library/live/hh826535
 Core Concepts: http://msdn.microsoft.com/en-us/library/live/hh826528
 
