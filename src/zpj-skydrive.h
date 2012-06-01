@@ -106,6 +106,16 @@ GInputStream       *zpj_skydrive_download_file_id_to_stream  (ZpjSkydrive *self,
                                                               GCancellable *cancellable,
                                                               GError **error);
 
+void                zpj_skydrive_download_file_id_to_stream_async  (ZpjSkydrive *self,
+                                                                    const gchar *file_id,
+                                                                    GCancellable *cancellable,
+                                                                    GAsyncReadyCallback callback,
+                                                                    gpointer user_data);
+
+GInputStream       *zpj_skydrive_download_file_id_to_stream_finish (ZpjSkydrive *self,
+                                                                    GAsyncResult *res,
+                                                                    GError **error);
+
 GInputStream       *zpj_skydrive_download_file_to_stream     (ZpjSkydrive *self,
                                                               ZpjSkydriveFile *file,
                                                               GCancellable *cancellable,

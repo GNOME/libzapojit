@@ -136,6 +136,27 @@ zpj_skydrive_download_file_got_chunk (SoupMessage *message, SoupBuffer *chunk, g
 
 
 static void
+zpj_skydrive_download_file_id_to_stream_in_thread_func (GSimpleAsyncResult *simple,
+                                                        GObject *object,
+                                                        GCancellable *cancellable)
+{
+  ZpjSkydrive *self = ZPJ_SKYDRIVE (object);
+  GError *error;
+  GInputStream *stream;
+  ZpjSkydriveThreadData *data;
+
+  data = (ZpjSkydriveThreadData *) g_simple_async_result_get_op_res_gpointer (simple);
+
+  error = NULL;
+  stream = zpj_skydrive_download_file_id_to_stream (self, data->entry_id, cancellable, &error);
+  if (error != NULL)
+    g_simple_async_result_take_error (simple, error);
+
+  g_value_take_object (&data->result, stream);
+}
+
+
+static void
 zpj_skydrive_list_folder_id_in_thread_func (GSimpleAsyncResult *simple, GObject *object, GCancellable *cancellable)
 {
   ZpjSkydrive *self = ZPJ_SKYDRIVE (object);
@@ -466,6 +487,62 @@ zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
   g_free (url);
   g_clear_object (&requester);
 
+  return ret_val;
+}
+
+
+void
+zpj_skydrive_download_file_id_to_stream_async (ZpjSkydrive *self,
+                                               const gchar *file_id,
+                                               GCancellable *cancellable,
+                                               GAsyncReadyCallback callback,
+                                               gpointer user_data)
+{
+  GSimpleAsyncResult *simple;
+  ZpjSkydriveThreadData *data;
+
+  g_return_if_fail (ZPJ_IS_SKYDRIVE (self));
+  g_return_if_fail (file_id != NULL && file_id[0] != '\0');
+
+  simple = g_simple_async_result_new (G_OBJECT (self),
+                                      callback,
+                                      user_data,
+                                      zpj_skydrive_download_file_id_to_stream_async);
+  g_simple_async_result_set_check_cancellable (simple, cancellable);
+
+  data = zpj_skydrive_thread_data_new (G_TYPE_INPUT_STREAM, file_id, NULL);
+  g_simple_async_result_set_op_res_gpointer (simple, data, (GDestroyNotify) zpj_skydrive_thread_data_free);
+
+  g_simple_async_result_run_in_thread (simple,
+                                       zpj_skydrive_download_file_id_to_stream_in_thread_func,
+                                       G_PRIORITY_DEFAULT,
+                                       cancellable);
+  g_object_unref (simple);
+}
+
+
+GInputStream *
+zpj_skydrive_download_file_id_to_stream_finish (ZpjSkydrive *self,
+                                                GAsyncResult *res,
+                                                GError **error)
+{
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
+  GInputStream *ret_val = NULL;
+  ZpjSkydriveThreadData *data;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (res,
+                                                        G_OBJECT (self),
+                                                        zpj_skydrive_download_file_id_to_stream_async),
+                        NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    goto out;
+
+  data = (ZpjSkydriveThreadData *) g_simple_async_result_get_op_res_gpointer (simple);
+  ret_val = G_INPUT_STREAM (g_value_get_object (&data->result));
+
+ out:
   return ret_val;
 }
 
