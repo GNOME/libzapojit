@@ -591,7 +591,8 @@ zpj_skydrive_download_file_id_to_stream_finish (ZpjSkydrive *self,
  *
  * Synchronously returns a stream for downloading @file from
  * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
- * Skydrive</ulink>.
+ * Skydrive</ulink>. See zpj_skydrive_download_file_to_stream_async()
+ * for the asynchronous version of this call.
  *
  * Returns: (transfer full): A #GInputStream to read the file data
  * from. Free the returned object with g_object_unref().
@@ -615,6 +616,25 @@ zpj_skydrive_download_file_to_stream (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_download_file_to_stream_async:
+ * @self: A #ZpjSkydrive.
+ * @file: The #ZpjSkydriveFile to be downloaded.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @callback: (scope async): A #GAsyncReadyCallback to call when the
+ *   request is satisfied.
+ * @user_data: (closure): The data to pass to @callback.
+ *
+ * Asynchronously returns a stream for downloading @file from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>. See zpj_skydrive_download_file_to_stream() for the
+ * synchronous version of this call.
+ *
+ * When the operation is finished, @callback will be called. You can
+ * then call zpj_skydrive_download_file_to_stream_finish() to get the
+ * result of the operation.
+ */
 void
 zpj_skydrive_download_file_to_stream_async (ZpjSkydrive *self,
                                             ZpjSkydriveFile *file,
@@ -634,6 +654,18 @@ zpj_skydrive_download_file_to_stream_async (ZpjSkydrive *self,
 }
 
 
+/**
+ * zpj_skydrive_download_file_to_stream_finish:
+ * @self: A #ZpjSkydrive.
+ * @res: A #GAsyncResult.
+ * @error: (allow-none): An optional #GError, or %NULL.
+ *
+ * Finishes an asynchronous operation started with
+ * zpj_skydrive_download_file_to_stream_async().
+ *
+ * Returns: (transfer full): A #GInputStream to read the file data
+ * from. Free the returned object with g_object_unref().
+ */
 GInputStream *
 zpj_skydrive_download_file_to_stream_finish (ZpjSkydrive *self, GAsyncResult *res, GError **error)
 {
