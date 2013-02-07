@@ -90,7 +90,8 @@ static const gchar *live_endpoint = "https://apis.live.net/v5.0/";
 
 
 static ZpjSkydriveEntry *
-zpj_skydrive_create_entry_from_json_node (JsonNode *node)
+zpj_skydrive_create_entry_from_json_node (JsonNode *node,
+                                          GError  **error)
 {
   ZpjSkydriveEntry *entry = NULL;
   JsonObject *object;
@@ -106,7 +107,8 @@ zpj_skydrive_create_entry_from_json_node (JsonNode *node)
   else if (g_strcmp0 (type, "photo") == 0)
     entry = zpj_skydrive_photo_new (node);
   else
-    g_warning ("unknown type: %s", type);
+    g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                 "Unknown entry type: %s", type);
 
   return entry;
 }
@@ -183,9 +185,19 @@ zpj_skydrive_list_json_array_foreach_folder (JsonArray *array,
 {
   GList **list = (GList **) user_data;
   ZpjSkydriveEntry *entry;
+  GError *error = NULL;
 
-  entry = zpj_skydrive_create_entry_from_json_node (element_node);
-  *list = g_list_prepend (*list, entry);
+  entry = zpj_skydrive_create_entry_from_json_node (element_node, &error);
+
+  if (entry)
+    {
+      *list = g_list_prepend (*list, entry);
+    }
+  else
+    {
+      g_warning ("%s", error->message);
+      g_clear_error (&error);
+    }
 }
 
 
@@ -1073,7 +1085,7 @@ zpj_skydrive_query_info_from_id (ZpjSkydrive *self, const gchar *id, GCancellabl
     goto out;
 
   root = json_parser_get_root (parser);
-  entry = zpj_skydrive_create_entry_from_json_node (root);
+  entry = zpj_skydrive_create_entry_from_json_node (root, error);
 
  out:
   g_clear_object (&parser);
