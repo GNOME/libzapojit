@@ -1,5 +1,5 @@
 AC_INIT([Zapojit],
-        [0.0.3],
+        [0.0.4],
         [https://bugzilla.gnome.org/enter_bug.cgi?product=libzapojit],
         [libzapojit],
         [])
