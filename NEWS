@@ -1,6 +1,9 @@
 Overview of changes in 0.0.3
 ============================
 
+* Bugs fixed:
+ 693353 Be more robust against unknown entry types
+
 
 Overview of changes in 0.0.2
 ============================
