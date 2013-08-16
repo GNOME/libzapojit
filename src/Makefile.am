@@ -96,8 +96,8 @@ Zpj_0_0_gir_INCLUDES = \
 	$(NULL)
 
 Zpj_0_0_gir_FILES = \
-	$(addprefix $(srcdir)/,$(libzapojit_0_0_la_headers)) \
-	$(addprefix $(srcdir)/,$(libzapojit_0_0_la_SOURCES)) \
+	$(libzapojit_0_0_la_headers) \
+	$(libzapojit_0_0_la_SOURCES) \
 	$(NULL)
 
 girdir = $(datadir)/gir-1.0
