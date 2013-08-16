@@ -113,15 +113,6 @@ CLEANFILES += \
 
 endif
 
-if MAINTAINER_MODE
-
-CLEANFILES += \
-	xgen-etbc \
-	xgen-etbh \
-	xgen-tmc \
-	xgen-tmh \
-	$(NULL)
-
 DISTCLEANFILES = \
 	$(libzapojit_0_0_la_built_sources) \
 	stamp-zpj-enums.h \
@@ -133,25 +124,21 @@ zpj-enums.h: stamp-zpj-enums.h
 
 stamp-zpj-enums.h: zpj-enums.h.template
 	$(AM_V_GEN) ( \
-		cd $(srcdir) \
-		&& ( glib-mkenums \
-			--template zpj-enums.h.template \
-                        zpj-skydrive-entry.h \
-                   ) >> xgen-etbh \
-		&& ( cmp -s xgen-etbh zpj-enums.h || cp xgen-etbh zpj-enums.h ) \
-		&& rm -f xgen-etbh \
+		glib-mkenums \
+			--template $< \
+                        $(srcdir)/zpj-skydrive-entry.h \
+                   > $(@F).tmp \
+		&& ( cmp -s $(@F).tmp zpj-enums.h || cp $(@F).tmp zpj-enums.h ) \
+		&& rm -f $(@F).tmp \
 		&& echo timestamp > $(@F) \
 	)
 
-zpj-enums.c: zpj-enums.c.template
+zpj-enums.c: zpj-enums.c.template stamp-zpj-enums.h
 	$(AM_V_GEN) ( \
-		cd $(srcdir) \
-		&& ( glib-mkenums \
-			--template zpj-enums.c.template \
-                        zpj-skydrive-entry.h \
-                   ) >> xgen-etbc \
-		&& ( cmp -s xgen-etbc zpj-enums.c || cp xgen-etbc zpj-enums.c ) \
-		&& rm -f xgen-etbc \
+		glib-mkenums \
+			--template $< \
+                        $(srcdir)/zpj-skydrive-entry.h \
+                   >> $(@F).tmp \
+		&& ( cmp -s $(@F).tmp zpj-enums.c || cp $(@F).tmp zpj-enums.c ) \
+		&& rm -f $(@F).tmp \
 	)
-
-endif
