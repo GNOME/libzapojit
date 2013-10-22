@@ -29,6 +29,7 @@
 #include <rest/rest-proxy.h>
 #include <rest/rest-proxy-call.h>
 
+#include "zpj-error.h"
 #include "zpj-skydrive.h"
 #include "zpj-skydrive-file.h"
 #include "zpj-skydrive-photo.h"
@@ -463,6 +464,8 @@ zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
 {
   ZpjSkydrivePrivate *priv = self->priv;
   GInputStream *ret_val = NULL;
+  GInputStream *stream = NULL;
+  JsonParser *parser = NULL;
   SoupMessage *message = NULL;
   SoupRequest *request = NULL;
   SoupRequester *requester = NULL;
@@ -488,18 +491,50 @@ zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
   message = soup_request_http_get_message (SOUP_REQUEST_HTTP (request));
   zpj_authorizer_process_message (priv->authorizer, NULL, message);
 
-  ret_val = soup_request_send (request, cancellable, error);
-  if (ret_val == NULL)
+  stream = soup_request_send (request, cancellable, error);
+  if (stream == NULL)
     goto out;
 
+  if (message->status_code != SOUP_STATUS_OK)
+    {
+      JsonNode *root;
+      JsonObject *object;
+      ZpjError error_code;
+      const gchar *code;
+      const gchar *message;
+
+      parser = json_parser_new ();
+      if (!json_parser_load_from_stream (parser, stream, cancellable, error))
+        goto out;
+
+      root = json_parser_get_root (parser);
+      object = json_node_get_object (root);
+      object = json_object_get_object_member (object, "error");
+      code = json_object_get_string_member (object, "code");
+      message = json_object_get_string_member (object, "message");
+
+      if (g_strcmp0 (code, "request_url_invalid") == 0)
+        error_code = ZPJ_ERROR_REQUEST_URL_INVALID;
+      else
+        error_code = ZPJ_ERROR_UNKNOWN;
+
+      g_set_error_literal (error, ZPJ_ERROR, error_code, message);
+      goto out;
+    }
+
+  ret_val = g_object_ref (stream);
+
   /* The session is needed to use the input stream */
-  g_object_weak_ref (G_OBJECT (ret_val), (GWeakNotify) g_object_unref, session);
+  g_object_weak_ref (G_OBJECT (ret_val), (GWeakNotify) g_object_unref, g_object_ref (session));
 
  out:
+  g_clear_object (&parser);
+  g_clear_object (&stream);
   g_clear_object (&message);
   g_clear_object (&request);
   g_free (url);
   g_clear_object (&requester);
+  g_clear_object (&session);
 
   return ret_val;
 }
