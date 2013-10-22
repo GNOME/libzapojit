@@ -9,6 +9,7 @@ libzapojit_0_0_la_built_sources = \
 libzapojit_0_0_la_headers = \
 	zpj-authorization-domain.h \
 	zpj-authorizer.h \
+	zpj-error.h \
 	zpj-goa-authorizer.h \
 	zpj-skydrive.h \
 	zpj-skydrive-entry.h \
@@ -21,6 +22,7 @@ libzapojit_0_0_la_SOURCES = \
 	$(libzapojit_0_0_la_built_sources) \
 	zpj-authorization-domain.c \
 	zpj-authorizer.c \
+	zpj-error.c \
 	zpj-goa-authorizer.c \
 	zpj-skydrive.c \
 	zpj-skydrive-entry.c \

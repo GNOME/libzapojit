@@ -1,6 +1,6 @@
 /*
  * Zapojit - GLib/GObject wrapper for the SkyDrive and Hotmail REST APIs
- * Copyright © 2012 Red Hat, Inc.
+ * Copyright © 2013 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,17 +18,25 @@
  * 02110-1301, USA.
  */
 
-#ifndef ZPJ_H
-#define ZPJ_H
 
-#include <zpj/zpj-authorization-domain.h>
-#include <zpj/zpj-authorizer.h>
-#include <zpj/zpj-error.h>
-#include <zpj/zpj-goa-authorizer.h>
-#include <zpj/zpj-skydrive.h>
-#include <zpj/zpj-skydrive-entry.h>
-#include <zpj/zpj-skydrive-file.h>
-#include <zpj/zpj-skydrive-folder.h>
-#include <zpj/zpj-skydrive-photo.h>
+#include "config.h"
 
-#endif /* ZPJ_H */
+#include "zpj-error.h"
+
+
+/**
+ * SECTION:zpj-error
+ * @title: ZpjError
+ * @short_description: Error codes.
+ * @include: zpj/zpj.h
+ *
+ * Error codes used to represent errors thrown by the SkyDrive and
+ * Hotmail REST APIs.
+ */
+
+
+GQuark
+zpj_error_quark (void)
+{
+  return g_quark_from_static_string ("zpj-error-quark");
+}
