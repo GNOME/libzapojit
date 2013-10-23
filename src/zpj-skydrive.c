@@ -1,6 +1,6 @@
 /*
  * Zapojit - GLib/GObject wrapper for the SkyDrive and Hotmail REST APIs
- * Copyright © 2012 Red Hat, Inc.
+ * Copyright © 2012, 2013 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -138,6 +138,87 @@ zpj_skydrive_download_file_got_chunk (SoupMessage *message, SoupBuffer *chunk, g
                              &bytes_written,
                              data->cancellable,
                              data->error);
+}
+
+
+static GInputStream *
+zpj_skydrive_download_file_id_to_stream_full (ZpjSkydrive *self,
+                                              const gchar *file_id,
+                                              const gchar *url_suffix,
+                                              GCancellable *cancellable,
+                                              GError **error)
+{
+  ZpjSkydrivePrivate *priv = self->priv;
+  GInputStream *ret_val = NULL;
+  GInputStream *stream = NULL;
+  JsonParser *parser = NULL;
+  SoupMessage *message = NULL;
+  SoupRequest *request = NULL;
+  SoupRequester *requester = NULL;
+  SoupSession *session= NULL;
+  gchar *url = NULL;
+
+  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
+    goto out;
+
+  session = soup_session_sync_new ();
+  requester = soup_requester_new ();
+  soup_session_add_feature (session, SOUP_SESSION_FEATURE (requester));
+
+  url = g_strconcat (live_endpoint, file_id, url_suffix, NULL);
+  request = soup_requester_request (requester, url, error);
+  if (request == NULL)
+    goto out;
+
+  message = soup_request_http_get_message (SOUP_REQUEST_HTTP (request));
+  zpj_authorizer_process_message (priv->authorizer, NULL, message);
+
+  stream = soup_request_send (request, cancellable, error);
+  if (stream == NULL)
+    goto out;
+
+  if (message->status_code != SOUP_STATUS_OK)
+    {
+      JsonNode *root;
+      JsonObject *object;
+      ZpjError error_code;
+      const gchar *code;
+      const gchar *message;
+
+      parser = json_parser_new ();
+      if (!json_parser_load_from_stream (parser, stream, cancellable, error))
+        goto out;
+
+      root = json_parser_get_root (parser);
+      object = json_node_get_object (root);
+      object = json_object_get_object_member (object, "error");
+      code = json_object_get_string_member (object, "code");
+      message = json_object_get_string_member (object, "message");
+
+      if (g_strcmp0 (code, "request_url_invalid") == 0)
+        error_code = ZPJ_ERROR_REQUEST_URL_INVALID;
+      else
+        error_code = ZPJ_ERROR_UNKNOWN;
+
+      g_set_error_literal (error, ZPJ_ERROR, error_code, message);
+      goto out;
+    }
+
+  ret_val = g_object_ref (stream);
+
+  /* The session is needed to use the input stream */
+  g_object_weak_ref (G_OBJECT (ret_val), (GWeakNotify) g_object_unref, g_object_ref (session));
+
+ out:
+  g_clear_object (&parser);
+  g_clear_object (&stream);
+  g_clear_object (&message);
+  g_clear_object (&request);
+  g_free (url);
+  g_clear_object (&requester);
+  g_clear_object (&session);
+
+  return ret_val;
 }
 
 
@@ -465,81 +546,11 @@ zpj_skydrive_download_file_id_to_stream (ZpjSkydrive *self,
                                          GCancellable *cancellable,
                                          GError **error)
 {
-  ZpjSkydrivePrivate *priv = self->priv;
-  GInputStream *ret_val = NULL;
-  GInputStream *stream = NULL;
-  JsonParser *parser = NULL;
-  SoupMessage *message = NULL;
-  SoupRequest *request = NULL;
-  SoupRequester *requester = NULL;
-  SoupSession *session= NULL;
-  gchar *url = NULL;
-
   g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
   g_return_val_if_fail (file_id != NULL && file_id[0] != '\0', NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  if (!zpj_authorizer_refresh_authorization (priv->authorizer, cancellable, error))
-    goto out;
-
-  session = soup_session_sync_new ();
-  requester = soup_requester_new ();
-  soup_session_add_feature (session, SOUP_SESSION_FEATURE (requester));
-
-  url = g_strconcat (live_endpoint, file_id, "/content", NULL);
-  request = soup_requester_request (requester, url, error);
-  if (request == NULL)
-    goto out;
-
-  message = soup_request_http_get_message (SOUP_REQUEST_HTTP (request));
-  zpj_authorizer_process_message (priv->authorizer, NULL, message);
-
-  stream = soup_request_send (request, cancellable, error);
-  if (stream == NULL)
-    goto out;
-
-  if (message->status_code != SOUP_STATUS_OK)
-    {
-      JsonNode *root;
-      JsonObject *object;
-      ZpjError error_code;
-      const gchar *code;
-      const gchar *message;
-
-      parser = json_parser_new ();
-      if (!json_parser_load_from_stream (parser, stream, cancellable, error))
-        goto out;
-
-      root = json_parser_get_root (parser);
-      object = json_node_get_object (root);
-      object = json_object_get_object_member (object, "error");
-      code = json_object_get_string_member (object, "code");
-      message = json_object_get_string_member (object, "message");
-
-      if (g_strcmp0 (code, "request_url_invalid") == 0)
-        error_code = ZPJ_ERROR_REQUEST_URL_INVALID;
-      else
-        error_code = ZPJ_ERROR_UNKNOWN;
-
-      g_set_error_literal (error, ZPJ_ERROR, error_code, message);
-      goto out;
-    }
-
-  ret_val = g_object_ref (stream);
-
-  /* The session is needed to use the input stream */
-  g_object_weak_ref (G_OBJECT (ret_val), (GWeakNotify) g_object_unref, g_object_ref (session));
-
- out:
-  g_clear_object (&parser);
-  g_clear_object (&stream);
-  g_clear_object (&message);
-  g_clear_object (&request);
-  g_free (url);
-  g_clear_object (&requester);
-  g_clear_object (&session);
-
-  return ret_val;
+  return zpj_skydrive_download_file_id_to_stream_full (self, file_id, "/content", cancellable, error);
 }
 
 
@@ -1243,6 +1254,62 @@ zpj_skydrive_set_authorizer (ZpjSkydrive *self, ZpjAuthorizer *authorizer)
     }
 
   g_object_notify (G_OBJECT (self), "authorizer");
+}
+
+
+/**
+ * zpj_skydrive_thumbnail_file_id_to_stream:
+ * @self: A #ZpjSkydrive.
+ * @file_id: The ID of the #ZpjSkydriveFile to be thumbnailed.
+ * @size: The thumbnail size.
+ * @cancellable: (allow-none): An optional #GCancellable object, or
+ *   %NULL.
+ * @error: (allow-none): An optional %GError or %NULL.
+ *
+ * Synchronously returns a stream for downloading the thumbnail of the
+ * file corresponding to @file_id from
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826521">
+ * Skydrive</ulink>. See
+ * zpj_skydrive_thumbnail_file_id_to_stream_async() for the
+ * asynchronous version of this call.
+ *
+ * Thumbnails are only available for #ZpjSkydrivePhoto and
+ * #ZpjSkydriveVideo objects. If @file_id refers to some other kind of
+ * #ZpjSkydriveFile, the error %ZPJ_ERROR_REQUEST_URL_INVALID will be
+ * returned.
+ *
+ * Returns: (transfer full): A #GInputStream to read the thumbnail
+ * data from. Free the returned object with g_object_unref().
+ */
+GInputStream *
+zpj_skydrive_thumbnail_file_id_to_stream (ZpjSkydrive *self,
+                                          const gchar *file_id,
+                                          ZpjThumbnailSize size,
+                                          GCancellable *cancellable,
+                                          GError **error)
+{
+  const gchar *url_suffix;
+
+  g_return_val_if_fail (ZPJ_IS_SKYDRIVE (self), NULL);
+  g_return_val_if_fail (file_id != NULL && file_id[0] != '\0', NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  switch (size)
+    {
+    case ZPJ_THUMBNAIL_SIZE_SMALL:
+      url_suffix = "/picture?type=small";
+      break;
+
+    case ZPJ_THUMBNAIL_SIZE_NORMAL:
+      url_suffix = "/picture?type=normal";
+      break;
+
+    default:
+      url_suffix = "/picture";
+      break;
+    }
+
+  return zpj_skydrive_download_file_id_to_stream_full (self, file_id, url_suffix, cancellable, error);
 }
 
 

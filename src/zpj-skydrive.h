@@ -1,6 +1,6 @@
 /*
  * Zapojit - GLib/GObject wrapper for the SkyDrive and Hotmail REST APIs
- * Copyright © 2012 Red Hat, Inc.
+ * Copyright © 2012, 2013 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,6 +53,23 @@ G_BEGIN_DECLS
 #define ZPJ_SKYDRIVE_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), \
    ZPJ_TYPE_SKYDRIVE, ZpjSkydriveClass))
+
+/**
+ * ZpjThumbnailSize:
+ * @ZPJ_THUMBNAIL_SIZE_SMALL: Smallest possible size.
+ * @ZPJ_THUMBNAIL_SIZE_NORMAL: The default.
+ *
+ * Different
+ * <ulink url="http://msdn.microsoft.com/en-us/library/live/hh826522.aspx#reading_photos_videos_props">
+ * thumbnail sizes</ulink> offered by SkyDrive.
+ *
+ * This enumeration can be expanded at a later date.
+ */
+typedef enum
+{
+  ZPJ_THUMBNAIL_SIZE_SMALL,
+  ZPJ_THUMBNAIL_SIZE_NORMAL
+} ZpjThumbnailSize;
 
 typedef struct _ZpjSkydrive        ZpjSkydrive;
 typedef struct _ZpjSkydriveClass   ZpjSkydriveClass;
@@ -181,6 +198,12 @@ ZpjSkydriveEntry   *zpj_skydrive_query_info_from_id_finish   (ZpjSkydrive *self,
                                                               GError **error);
 
 void                zpj_skydrive_set_authorizer              (ZpjSkydrive *self, ZpjAuthorizer *authorizer);
+
+GInputStream       *zpj_skydrive_thumbnail_file_id_to_stream (ZpjSkydrive *self,
+                                                              const gchar *file_id,
+                                                              ZpjThumbnailSize size,
+                                                              GCancellable *cancellable,
+                                                              GError **error);
 
 gboolean            zpj_skydrive_upload_path_to_folder       (ZpjSkydrive *self,
                                                               const gchar *path,
