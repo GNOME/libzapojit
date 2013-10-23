@@ -28,6 +28,7 @@
 #include "zpj-skydrive-file.h"
 #include "zpj-skydrive-folder.h"
 #include "zpj-skydrive-photo.h"
+#include "zpj-skydrive-video.h"
 
 
 /**
@@ -141,6 +142,11 @@ zpj_skydrive_entry_default_parse_json_node (ZpjSkydriveEntry *self, JsonNode *no
     {
       g_assert_cmpuint (G_OBJECT_TYPE (self), ==, ZPJ_TYPE_SKYDRIVE_PHOTO);
       priv->type = ZPJ_SKYDRIVE_ENTRY_TYPE_PHOTO;
+    }
+  else if (g_strcmp0 (type, "video") == 0)
+    {
+      g_assert_cmpuint (G_OBJECT_TYPE (self), ==, ZPJ_TYPE_SKYDRIVE_VIDEO);
+      priv->type = ZPJ_SKYDRIVE_ENTRY_TYPE_VIDEO;
     }
   else
     g_warning ("unknown type: %s", type);

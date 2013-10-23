@@ -33,6 +33,7 @@
 #include "zpj-skydrive.h"
 #include "zpj-skydrive-file.h"
 #include "zpj-skydrive-photo.h"
+#include "zpj-skydrive-video.h"
 
 
 /**
@@ -107,6 +108,8 @@ zpj_skydrive_create_entry_from_json_node (JsonNode *node,
     entry = zpj_skydrive_folder_new (node);
   else if (g_strcmp0 (type, "photo") == 0)
     entry = zpj_skydrive_photo_new (node);
+  else if (g_strcmp0 (type, "video") == 0)
+    entry = zpj_skydrive_video_new (node);
   else
     g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
                  "Unknown entry type: %s", type);

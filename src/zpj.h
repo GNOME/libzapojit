@@ -1,6 +1,6 @@
 /*
  * Zapojit - GLib/GObject wrapper for the SkyDrive and Hotmail REST APIs
- * Copyright © 2012 Red Hat, Inc.
+ * Copyright © 2012, 2013 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,5 +30,6 @@
 #include <zpj/zpj-skydrive-file.h>
 #include <zpj/zpj-skydrive-folder.h>
 #include <zpj/zpj-skydrive-photo.h>
+#include <zpj/zpj-skydrive-video.h>
 
 #endif /* ZPJ_H */

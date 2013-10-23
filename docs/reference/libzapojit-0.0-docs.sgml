@@ -61,6 +61,7 @@
     <xi:include href="xml/zpj-skydrive-file.xml"/>
     <xi:include href="xml/zpj-skydrive-folder.xml"/>
     <xi:include href="xml/zpj-skydrive-photo.xml"/>
+    <xi:include href="xml/zpj-skydrive-video.xml"/>
     <xi:include href="xml/zpj-error.xml"/>
   </chapter>
 
