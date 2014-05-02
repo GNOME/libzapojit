@@ -1,5 +1,7 @@
 SUBDIRS = src docs po
 
+ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
+
 INTLTOOL_FILES = \
 	intltool-extract.in \
 	intltool-merge.in \
