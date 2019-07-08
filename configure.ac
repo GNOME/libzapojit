@@ -26,13 +26,6 @@ SOUP_MIN_VERSION=2.38
 
 GOBJECT_INTROSPECTION_CHECK([1.30.0])
 
-IT_PROG_INTLTOOL([0.35.0])
-
-GETTEXT_PACKAGE=AC_PACKAGE_TARNAME
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"],
-                   [GETTEXT package name])
-
 LT_INIT
 
 GTK_DOC_CHECK([1.11],[--flavour no-tmpl])
@@ -56,7 +49,6 @@ Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/version.xml
-src/Makefile
-po/Makefile.in
-])
+src/Makefile])
+
 AC_OUTPUT
