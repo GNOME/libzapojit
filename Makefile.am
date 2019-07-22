@@ -1,12 +1,4 @@
-SUBDIRS = src docs po
-
-ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
-
-INTLTOOL_FILES = \
-	intltool-extract.in \
-	intltool-merge.in \
-	intltool-update.in \
-	$(NULL)
+SUBDIRS = src docs
 
 libzapojitdocdir = $(docdir)
 libzapojitdoc_DATA = \
@@ -23,7 +15,6 @@ libzapojitpkgconfig_DATA = \
 	$(NULL)
 
 EXTRA_DIST = \
-	$(INTLTOOL_FILES) \
 	$(libzapojitdoc_DATA) \
 	$(NULL)
 
@@ -33,10 +24,6 @@ DISTCHECK_CONFIGURE_FLAGS = \
 	$(NULL)
 
 DISTCLEANFILES = \
-	intltool-extract \
-	intltool-merge \
-	intltool-update \
-	po/.intltool-merge-cache \
 	$(NULL)
 
 MAINTAINERCLEANFILES = \
